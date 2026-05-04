@@ -362,6 +362,11 @@ function App() {
   const [loaderDone, setLoaderDone] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [loginMounted, setLoginMounted] = useState(false)
+  const [loginVisible, setLoginVisible] = useState(false)
+  const [loginIdentifier, setLoginIdentifier] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const loginFirstFieldRef = useRef(null)
 
   useEffect(() => {
     const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
@@ -432,9 +437,49 @@ function App() {
 
   const closeNav = () => setNavOpen(false)
 
+  const openLogin = () => {
+    closeNav()
+    setLoginMounted(true)
+    requestAnimationFrame(() => setLoginVisible(true))
+  }
+
+  const closeLogin = () => {
+    setLoginVisible(false)
+    window.setTimeout(() => setLoginMounted(false), 200)
+  }
+
+  useEffect(() => {
+    if (!loginMounted) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeLogin()
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [loginMounted])
+
+  useEffect(() => {
+    if (!loginVisible) return
+    window.setTimeout(() => loginFirstFieldRef.current?.focus(), 0)
+  }, [loginVisible])
+
   const handleSubmit = (event) => {
     event.preventDefault()
     alert('Terima kasih! Data Anda akan kami verifikasi.')
+  }
+
+  const handleLoginSubmit = (event) => {
+    event.preventDefault()
+    alert('Fitur masuk sedang disiapkan.')
+    closeLogin()
   }
 
   return (
@@ -453,7 +498,7 @@ function App() {
       >
         <div>
           <h1
-            className="font-serif text-3xl text-white sm:text-5xl"
+            className="font-serif text-3xl text-center text-white sm:text-5xl"
             aria-label="Persatuan Tobing Ompu Raja Jae Jae"
           >
             {loaderText}
@@ -488,10 +533,15 @@ function App() {
               {navOpen ? '×' : '☰'}
             </button>
             <ul
-              className={`fixed top-0 right-0 z-[999] flex h-screen w-4/5 flex-col items-center justify-center gap-8 overflow-y-auto border-l border-white/10 bg-[rgba(17,17,17,0.98)] py-20 transition-transform duration-500 md:static md:z-auto md:h-auto md:w-auto md:translate-x-0 md:flex-row md:justify-end md:gap-10 md:overflow-visible md:border-0 md:bg-transparent md:py-0 md:transition-none ${
+              className={`fixed top-0 right-0 z-[999] flex h-screen w-4/5 flex-col items-center justify-start gap-8 overflow-y-auto border-l border-white/10 bg-[rgba(17,17,17,0.98)] pt-16 pb-20 transition-transform duration-500 md:static md:z-auto md:h-auto md:w-auto md:translate-x-0 md:flex-row md:justify-end md:gap-10 md:overflow-visible md:border-0 md:bg-transparent md:py-0 md:transition-none ${
                 navOpen ? 'translate-x-0' : 'translate-x-full'
               }`}
             >
+              <li className="md:hidden">
+                <div className="flex w-full items-center justify-center gap-2.5 font-serif text-2xl font-bold text-white">
+                  <span className="text-[#c0392b]">♦</span> Tobing O.R. Jae Jae
+                </div>
+              </li>
               <li>
                 <a
                   href="#beranda"
@@ -546,10 +596,115 @@ function App() {
                   Gabung
                 </a>
               </li>
+              <li className="mt-2 md:mt-0">
+                <button
+                  type="button"
+                  onClick={openLogin}
+                  className="inline-block rounded-full border border-[#f1c40f] bg-[#f1c40f] px-8 py-3 text-sm font-semibold uppercase tracking-[1px] text-[#111111] transition hover:bg-transparent hover:text-[#f1c40f]"
+                >
+                  Masuk
+                </button>
+              </li>
             </ul>
           </nav>
         </div>
       </header>
+
+      {loginMounted ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-title"
+          className={`fixed inset-0 z-[2000] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm transition-opacity duration-200 ${
+            loginVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeLogin()
+          }}
+        >
+          <div
+            className={`w-full max-w-md transform rounded-2xl border border-white/10 bg-[rgba(17,17,17,0.95)] shadow-[0_25px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl transition-all duration-200 ease-out ${
+              loginVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 pt-6 pb-5">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[1px] text-[#f1c40f]">
+                  <span className="text-[#c0392b]">♦</span> Admin
+                </div>
+                <h2 id="login-title" className="font-serif text-2xl text-white">
+                  Masuk
+                </h2>
+                <p className="mt-1 text-sm text-white/70">Silakan masukkan akun Anda untuk melanjutkan.</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Tutup"
+                onClick={closeLogin}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-white/90 transition hover:bg-white/10"
+              >
+                ×
+              </button>
+            </div>
+
+            <form className="px-6 pt-6 pb-6" onSubmit={handleLoginSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="login-identifier" className="mb-2 block text-sm font-semibold text-white/90">
+                    Email / Username
+                  </label>
+                  <input
+                    ref={loginFirstFieldRef}
+                    id="login-identifier"
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    autoComplete="username"
+                    placeholder="contoh: tobingsolid / email@domain.com"
+                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/40 transition focus:border-[#f1c40f] focus:bg-white/10 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label htmlFor="login-password" className="block text-sm font-semibold text-white/90">
+                      Password
+                    </label>
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-[#f1c40f] transition hover:text-white"
+                      onClick={() => alert('Silakan hubungi admin untuk reset password.')}
+                    >
+                      Lupa password?
+                    </button>
+                  </div>
+                  <input
+                    id="login-password"
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    autoComplete="current-password"
+                    placeholder="Masukkan password"
+                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/40 transition focus:border-[#f1c40f] focus:bg-white/10 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c0392b] to-[#f1c40f] px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#111111] transition hover:brightness-110"
+                >
+                  Masuk
+                </button>
+
+                <div className="text-center text-xs text-white/60">
+                  Dengan masuk, Anda menyetujui kebijakan dan aturan yang berlaku.
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       <section id="beranda" className="bg-hero relative flex h-screen items-center justify-center text-center text-white">
         <div className="z-10 mx-auto max-w-[800px] px-5">
@@ -587,7 +742,7 @@ function App() {
                 className="relative z-10 rounded-[5px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] grayscale transition hover:grayscale-0 hover:scale-[1.02]"
               />
             </div>
-            <div className="reveal-right">
+            <div className="reveal-right max-md:text-center">
               <h2 className="mb-6 text-[2.5rem]">Satuan Hati dalam Persaudaraan</h2>
               <p className="mb-6 font-light text-[#bbb]">
                 Marga Tobing O.R. Jae Jae adalah simbol kekuatan dalam kebersamaan. Di era modern ini, kami
