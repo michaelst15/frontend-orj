@@ -488,8 +488,8 @@ function App() {
               {navOpen ? '×' : '☰'}
             </button>
             <ul
-              className={`fixed top-0 z-[999] flex h-screen w-4/5 flex-col items-center justify-center gap-8 border-l border-white/10 bg-[rgba(17,17,17,0.98)] transition-[right] duration-500 md:static md:z-auto md:h-auto md:w-auto md:flex-row md:justify-end md:gap-10 md:border-0 md:bg-transparent md:transition-none ${
-                navOpen ? 'right-0' : 'right-[-100%]'
+              className={`fixed top-0 right-0 z-[999] flex h-screen w-4/5 flex-col items-center justify-center gap-8 overflow-y-auto border-l border-white/10 bg-[rgba(17,17,17,0.98)] py-20 transition-transform duration-500 md:static md:z-auto md:h-auto md:w-auto md:translate-x-0 md:flex-row md:justify-end md:gap-10 md:overflow-visible md:border-0 md:bg-transparent md:py-0 md:transition-none ${
+                navOpen ? 'translate-x-0' : 'translate-x-full'
               }`}
             >
               <li>
