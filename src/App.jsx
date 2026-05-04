@@ -1,0 +1,935 @@
+import { useEffect, useRef, useState } from 'react'
+import foto2 from './assets/foto2.jpg'
+import anonim from './assets/anonim.jpg'
+import raja from './assets/raja.jpg'
+import padan from './assets/padan.jpg'
+import kampung from './assets/kampung.jpg'
+
+function SilsilahFlow() {
+  const containerRef = useRef(null)
+  const transformLayerRef = useRef(null)
+  const svgLayerRef = useRef(null)
+  const nodesContainerRef = useRef(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    const transformLayer = transformLayerRef.current
+    const svgLayer = svgLayerRef.current
+    const nodesContainer = nodesContainerRef.current
+
+    if (!container || !transformLayer || !svgLayer || !nodesContainer) return
+
+    const treeData = {
+      id: 'root',
+      name: 'R.Lumban Tobing',
+      children: [
+        { id: 'r-nadjurdjur', name: 'R.Nadjurdjur' },
+        {
+          id: 'sariburadja',
+          name: 'Sariburadja',
+          children: [
+            { id: 'datu-toktang-diadji', name: 'Datu Toktang Diadji' },
+            {
+              id: 'tumonggo-tua',
+              name: 'Tumonggo Tua',
+              children: [
+                {
+                  id: 'namorahin',
+                  name: 'Namorahian',
+                  children: [
+                    {
+                      id: 'orj-idjaedjae',
+                      name: 'O.R.idjaedjae',
+                      children: [
+                        { id: 'o-tuan', name: 'O.Tuan' },
+                        { id: 'o-taragoling', name: 'O.Taragoling' },
+                        { id: 'o-mogot', name: 'O.Mogot' },
+                        { id: 'datu-panganganaa-a', name: 'Datu Panganganaa' },
+                      ],
+                    },
+                    {
+                      id: 'bonan-dolok',
+                      name: 'Bonan Dolok',
+                      children: [
+                        {
+                          id: 'panguluradja',
+                          name: 'Panguluradja',
+                          children: [
+                            { id: 'o-sumurung', name: 'O.Sumurung' },
+                            { id: 'o-sumuntul', name: 'O.Sumuntul' },
+                            { id: 'o-somale', name: 'O.Somale' },
+                          ],
+                        },
+                        { id: 'namora-sende', name: 'Namora Sende' },
+                        { id: 'panahan-tunggal', name: 'Panahan Tunggal' },
+                      ],
+                    },
+                    {
+                      id: 'parumarea',
+                      name: 'Parumarea',
+                      children: [
+                        { id: 'danggur-soaloan', name: 'Danggur Soaloan' },
+                        { id: 'o-ranggas', name: 'O.Ranggas' },
+                        { id: 'paima-tahi', name: 'Paima Tahi' },
+                        { id: 'datu-panganganaa-b', name: 'Datu Panganganaa' },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  id: 'rangkea-sipapagan',
+                  name: 'Rangkea Sipapagan',
+                  children: [
+                    { id: 'r-orang-marberang', name: 'R.Orang Marberang' },
+                    { id: 'porhislaga', name: 'Porhislaga' },
+                    { id: 'sahapanaluan', name: 'Sahapanaluan' },
+                    { id: 'lenge2-ampang', name: 'Lenge2 Ampang' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+
+    const CONFIG = {
+      nodeWidth: 160,
+      nodeHeight: 32,
+      verticalGap: 70,
+      startY: 20,
+      virtualWidth: 1600,
+    }
+
+    let nodes = []
+    let edges = []
+    let scale = 1
+    let pointX = 0
+    let pointY = 0
+
+    const updateTransform = () => {
+      transformLayer.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`
+    }
+
+    const POSITION = {
+      root: { x: 0.56, row: 0 },
+
+      'r-nadjurdjur': { x: 0.2, row: 1 },
+      sariburadja: { x: 0.82, row: 1 },
+
+      'datu-toktang-diadji': { x: 0.88, row: 2 },
+      'tumonggo-tua': { x: 0.58, row: 2 },
+
+      namorahin: { x: 0.28, row: 3 },
+      'rangkea-sipapagan': { x: 0.68, row: 3 },
+
+      'orj-idjaedjae': { x: 0.12, row: 4 },
+      'bonan-dolok': { x: 0.38, row: 4 },
+      parumarea: { x: 0.56, row: 4 },
+      'r-orang-marberang': { x: 0.86, row: 4 },
+
+      'o-tuan': { x: 0.12, row: 5 },
+      panguluradja: { x: 0.3, row: 5 },
+      'namora-sende': { x: 0.4, row: 5 },
+      'panahan-tunggal': { x: 0.48, row: 5 },
+      'danggur-soaloan': { x: 0.62, row: 5 },
+      porhislaga: { x: 0.86, row: 5 },
+
+      'o-taragoling': { x: 0.12, row: 6 },
+      'o-ranggas': { x: 0.58, row: 6 },
+      sahapanaluan: { x: 0.86, row: 6 },
+
+      'o-mogot': { x: 0.12, row: 7 },
+      'paima-tahi': { x: 0.58, row: 7 },
+      'lenge2-ampang': { x: 0.86, row: 7 },
+
+      'datu-panganganaa-a': { x: 0.12, row: 8 },
+      'datu-panganganaa-b': { x: 0.58, row: 8 },
+
+      'o-sumurung': { x: 0.25, row: 9 },
+      'o-sumuntul': { x: 0.36, row: 9 },
+      'o-somale': { x: 0.47, row: 9 },
+    }
+
+    const assignPresetCoordinates = (node) => {
+      const pos = POSITION[node.id]
+      if (pos) {
+        node._x = pos.x * CONFIG.virtualWidth
+        node._y = CONFIG.startY + pos.row * CONFIG.verticalGap
+        node._depth = pos.row
+      } else {
+        node._x = CONFIG.virtualWidth * 0.5
+        node._y = CONFIG.startY
+        node._depth = 0
+      }
+
+      if (node.children && node.children.length > 0) {
+        node.children.forEach((child) => assignPresetCoordinates(child))
+      }
+    }
+
+    const drawSegment = (x1, y1, x2, y2) => {
+      const d = `M ${x1} ${y1} L ${x2} ${y2}`
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      path.setAttribute('d', d)
+      path.classList.add('silsilah-connection-path')
+      svgLayer.appendChild(path)
+
+      const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      flowPath.setAttribute('d', d)
+      flowPath.classList.add('silsilah-flow-anim')
+      flowPath.style.animationDelay = `${Math.random() * 2}s`
+      svgLayer.appendChild(flowPath)
+    }
+
+    const drawNode = (node) => {
+      nodes.push(node)
+
+      const el = document.createElement('div')
+      el.className = 'silsilah-node'
+      el.dataset.id = node.id
+      el.dataset.level = node.level || ''
+      el.dataset.group = node.group || ''
+
+      el.style.left = `${node._x - CONFIG.nodeWidth / 2}px`
+      el.style.top = `${node._y}px`
+
+      const nodeLabel = String(node.name || '').replaceAll('\n', '<br/>')
+      el.innerHTML = `
+        <div class="silsilah-node-name">${nodeLabel}</div>
+      `
+
+      nodesContainer.appendChild(el)
+
+      if (node.children) {
+        node.children.forEach((child) => {
+          edges.push([node, child])
+          drawNode(child)
+        })
+      }
+    }
+
+    const playEntranceAnimation = () => {
+      const sortedNodes = [...nodes].sort((a, b) => (a._depth || 0) - (b._depth || 0))
+      sortedNodes.forEach((node, index) => {
+        const el = nodesContainer.querySelector(`.silsilah-node[data-id="${node.id}"]`)
+        if (!el) return
+        window.setTimeout(() => {
+          el.style.animation = 'silsilahNodeEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+        }, index * 120)
+      })
+    }
+
+    const replayAnimation = () => {
+      nodesContainer.querySelectorAll('.silsilah-node').forEach((el) => {
+        el.style.animation = 'none'
+        el.style.opacity = '0'
+        el.style.transform = 'translateY(20px)'
+        void el.offsetWidth
+      })
+      playEntranceAnimation()
+    }
+
+    const getBounds = (node) => {
+      let minX = node._x - CONFIG.nodeWidth / 2
+      let maxX = node._x + CONFIG.nodeWidth / 2
+      let minY = node._y
+      let maxY = node._y + CONFIG.nodeHeight
+
+      if (node.children && node.children.length > 0) {
+        node.children.forEach((child) => {
+          const b = getBounds(child)
+          minX = Math.min(minX, b.minX)
+          maxX = Math.max(maxX, b.maxX)
+          minY = Math.min(minY, b.minY)
+          maxY = Math.max(maxY, b.maxY)
+        })
+      }
+
+      return { minX, maxX, minY, maxY }
+    }
+
+    const renderFlow = () => {
+      nodesContainer.innerHTML = ''
+      svgLayer.innerHTML = ''
+      nodes = []
+      edges = []
+
+      const containerWidth = container.clientWidth || window.innerWidth
+      const containerHeight = container.clientHeight || 650
+      assignPresetCoordinates(treeData)
+
+      const bounds = getBounds(treeData)
+      const treeWidth = bounds.maxX - bounds.minX
+      const treeHeight = bounds.maxY - bounds.minY
+      const padding = 24
+
+      scale = Math.min(
+        (containerWidth - padding * 2) / treeWidth,
+        (containerHeight - padding * 2) / treeHeight,
+        1,
+      )
+
+      pointX = (containerWidth - treeWidth * scale) / 2 - bounds.minX * scale
+      pointY = (containerHeight - treeHeight * scale) / 2 - bounds.minY * scale
+      updateTransform()
+
+      drawNode(treeData)
+      requestAnimationFrame(() => {
+        svgLayer.innerHTML = ''
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
+        marker.setAttribute('id', 'silsilah-arrow')
+        marker.setAttribute('viewBox', '0 0 10 10')
+        marker.setAttribute('refX', '9')
+        marker.setAttribute('refY', '5')
+        marker.setAttribute('markerWidth', '6')
+        marker.setAttribute('markerHeight', '6')
+        marker.setAttribute('orient', 'auto')
+        const markerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        markerPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z')
+        markerPath.setAttribute('fill', '#111111')
+        marker.appendChild(markerPath)
+        defs.appendChild(marker)
+        svgLayer.appendChild(defs)
+
+        const elementById = new Map(
+          Array.from(nodesContainer.querySelectorAll('.silsilah-node')).map((el) => [el.dataset.id, el]),
+        )
+
+        const drawConnection = (parent, child) => {
+          const parentEl = elementById.get(parent.id)
+          const childEl = elementById.get(child.id)
+          if (!parentEl || !childEl) return
+
+          const x1 = parent._x
+          const y1 = parent._y + parentEl.offsetHeight
+          const x2 = child._x
+          const y2 = child._y
+          const elbowY = y1 + 18
+          const arrowEndY = y2 - 2
+          const d = `M ${x1} ${y1} V ${elbowY} H ${x2} V ${arrowEndY}`
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+          path.setAttribute('d', d)
+          path.setAttribute('marker-end', 'url(#silsilah-arrow)')
+          path.classList.add('silsilah-connection-path')
+          svgLayer.appendChild(path)
+
+          const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+          flowPath.setAttribute('d', d)
+          flowPath.classList.add('silsilah-flow-anim')
+          flowPath.style.animationDelay = `${Math.random() * 2}s`
+          svgLayer.appendChild(flowPath)
+        }
+
+        edges.forEach(([parent, child]) => drawConnection(parent, child))
+      })
+      replayAnimation()
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      renderFlow()
+    })
+    resizeObserver.observe(container)
+
+    renderFlow()
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
+  return (
+    <div className="relative">
+      <div
+        ref={containerRef}
+        className="silsilah-flow-container h-[80vh] w-full overflow-hidden rounded-[20px] border border-black/10 bg-white"
+      >
+        <div ref={transformLayerRef} className="silsilah-transform-layer">
+          <svg ref={svgLayerRef} className="silsilah-connections" />
+          <div ref={nodesContainerRef} className="silsilah-nodes-container" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function App() {
+  const [loaderHidden, setLoaderHidden] = useState(false)
+  const [loaderText, setLoaderText] = useState('')
+  const [loaderDone, setLoaderDone] = useState(false)
+  const [navOpen, setNavOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+
+    if (reduceMotion) {
+      setLoaderText(fullText)
+      setLoaderDone(true)
+      const timeoutId = window.setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+        setLoaderHidden(true)
+      }, 400)
+      return () => window.clearTimeout(timeoutId)
+    }
+
+    let index = 0
+    const intervalId = window.setInterval(() => {
+      index += 1
+      setLoaderText(fullText.slice(0, index))
+      if (index >= fullText.length) {
+        window.clearInterval(intervalId)
+        setLoaderDone(true)
+        window.setTimeout(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+          setLoaderHidden(true)
+        }, 500)
+      }
+    }, 120)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
+
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px',
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('active')
+      })
+    }, observerOptions)
+
+    const targets = document.querySelectorAll('.reveal, .reveal-left, .reveal-right')
+    targets.forEach((el) => observer.observe(el))
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  const closeNav = () => setNavOpen(false)
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    alert('Terima kasih! Data Anda akan kami verifikasi.')
+  }
+
+  return (
+    <>
+      <div
+        id="loader"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#111111] transition-opacity duration-700"
+        style={
+          loaderHidden
+            ? {
+                opacity: 0,
+                visibility: 'hidden',
+              }
+            : undefined
+        }
+      >
+        <div>
+          <h1
+            className="font-serif text-3xl text-white sm:text-5xl"
+            aria-label="Persatuan Tobing Ompu Raja Jae Jae"
+          >
+            {loaderText}
+            {!loaderDone ? <span className="ml-1 inline-block w-[10px] animate-pulse">|</span> : null}
+          </h1>
+        </div>
+      </div>
+
+      <header
+        id="header"
+        className={`fixed top-0 z-[1000] w-full transition-all duration-500 ${
+          scrolled
+            ? 'border-b border-white/10 bg-[rgba(17,17,17,0.9)] py-2.5 backdrop-blur-md'
+            : ''
+        }`}
+      >
+        <div className="mx-auto max-w-[1200px] px-5">
+          <nav
+            className={`flex items-center justify-between transition-all duration-500 ${
+              scrolled ? 'h-[60px]' : 'h-20'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 font-serif text-[1.1rem] font-bold text-white sm:text-[1.8rem]">
+              <span className="text-[#c0392b]">♦</span> TOBING O.R. JAE JAE
+            </div>
+            <button
+              type="button"
+              className="z-[1001] bg-transparent text-[1.8rem] text-white md:hidden"
+              aria-label="Menu"
+              onClick={() => setNavOpen((open) => !open)}
+            >
+              {navOpen ? '×' : '☰'}
+            </button>
+            <ul
+              className={`fixed top-0 z-[999] flex h-screen w-4/5 flex-col items-center justify-center gap-8 border-l border-white/10 bg-[rgba(17,17,17,0.98)] transition-[right] duration-500 md:static md:z-auto md:h-auto md:w-auto md:flex-row md:justify-end md:gap-10 md:border-0 md:bg-transparent md:transition-none ${
+                navOpen ? 'right-0' : 'right-[-100%]'
+              }`}
+            >
+              <li>
+                <a
+                  href="#beranda"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Beranda
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#filosofi"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Filosofi
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#silsilah"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Silsilah
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#budaya"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Warisan
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#keluarga"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Keluarga
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#gabung"
+                  onClick={closeNav}
+                  className="relative py-1 text-sm font-medium text-white after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#c0392b] after:transition-[width] after:duration-300 after:content-[''] hover:after:w-full"
+                >
+                  Gabung
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <section id="beranda" className="bg-hero relative flex h-screen items-center justify-center text-center text-white">
+        <div className="z-10 mx-auto max-w-[800px] px-5">
+          <h1 className="mt-20 mb-6 text-[4.5rem] leading-[1.1] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] max-md:text-[2.8rem]">
+            Persatuan Tobing O.R. Jae Jae
+          </h1>
+          <p className="mb-10 text-[1.3rem] font-light text-[#ddd] max-md:text-base">
+            Menggabungkan kearifan lokal Batak dengan semangat modern. Bersama membangun persaudaraan yang
+            abadi.
+          </p>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <a
+              href="#filosofi"
+              className="inline-block rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b]"
+            >
+              Jelajahi Budaya
+            </a>
+            <a
+              href="#keluarga"
+              className="inline-block rounded-full border border-[#f1c40f] bg-transparent px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-[#f1c40f] transition hover:bg-[#f1c40f] hover:text-[#111111] hover:shadow-[0_0_20px_rgba(241,196,15,0.4)]"
+            >
+              Lihat Keluarga
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="filosofi" className="bg-[#111111] py-[100px]">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="grid grid-cols-1 items-center gap-20 md:grid-cols-2">
+            <div className="reveal-left relative after:absolute after:-left-5 after:-top-5 after:right-5 after:bottom-5 after:border-2 after:border-[#c0392b] after:content-['']">
+              <img
+                src={foto2}
+                alt="Pemandangan Danau Toba"
+                className="relative z-10 rounded-[5px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] grayscale transition hover:grayscale-0 hover:scale-[1.02]"
+              />
+            </div>
+            <div className="reveal-right">
+              <h2 className="mb-6 text-[2.5rem]">Satuan Hati dalam Persaudaraan</h2>
+              <p className="mb-6 font-light text-[#bbb]">
+                Marga Tobing O.R. Jae Jae adalah simbol kekuatan dalam kebersamaan. Di era modern ini, kami
+                berkomitmen untuk mentransformasikan nilai-nilai luhur leluhur menjadi tindakan nyata yang
+                relevan.
+              </p>
+              <div className="my-6 border-l-[3px] border-[#f1c40f] pl-5 font-serif text-xl italic text-[#f1c40f]">
+                &quot;Sipoppul pe mangan gabe, sahat hamatean, gabe mamea.&quot;
+              </div>
+              <p className="mb-6 font-light text-[#bbb]">
+                Kami tidak hanya menyambung tali silsilah, tetapi membangun jaringan kolaborasi antar
+                anggota keluarga yang tersebar di nusantara.
+              </p>
+              <a
+                href="#"
+                className="inline-block rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b]"
+              >
+                Pelajari Sejarah
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="silsilah" className="bg-[#fdfbf7] py-[100px] text-[#111111]">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="reveal text-center">
+            <h2 className="mb-4 inline-block bg-gradient-to-r from-[#f1c40f] to-[#111111] bg-clip-text text-5xl font-serif font-bold text-transparent">
+              Silsilah Tobing
+            </h2>
+          </div>
+
+          <div className="reveal mt-8">
+            <SilsilahFlow />
+          </div>
+        </div>
+      </section>
+
+      <section id="budaya" className="bg-[#111111] py-[100px]">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="reveal text-center">
+            <h2 className="mb-4 inline-block bg-gradient-to-r from-[#f1c40f] to-white bg-clip-text text-5xl font-serif font-bold text-transparent">
+              Warisan Leluhur
+            </h2>
+            <p className="mx-auto mb-16 max-w-[700px] text-base text-[#aaa]">
+              Tokoh Raja Tobing dan keberagaman lainnya
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="reveal overflow-hidden rounded-[15px] border border-white/10 bg-white/5 transition hover:-translate-y-2.5 hover:border-[#c0392b] hover:bg-white/10">
+              <div className="h-[220px] overflow-hidden">
+                <img
+                  src={raja}
+                  alt="Raja Tobing"
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="p-8">
+                <h3 className="mb-4 text-[1.4rem] font-semibold text-[#f1c40f]">Raja Tobing</h3>
+                <p className="text-[0.95rem] text-[#ccc]">
+                  Salah satu tokoh raja Tobing yang terkenal adalah Raja Pontas Lumban Tobing, tapi masih ada
+                  beberapa lainnya.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="reveal overflow-hidden rounded-[15px] border border-white/10 bg-white/5 transition hover:-translate-y-2.5 hover:border-[#c0392b] hover:bg-white/10"
+              style={{ transitionDelay: '0.1s' }}
+            >
+              <div className="h-[220px] overflow-hidden">
+                <img
+                  src={padan}
+                  alt="Si Opat Pisoran"
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="p-8">
+                <h3 className="mb-4 text-[1.4rem] font-semibold text-[#f1c40f]">Si Opat Pisoran</h3>
+                <p className="text-[0.95rem] text-[#ccc]">
+                  Lumban Tobing termasuk dalam golongan kesatuan marga dengan Hutabarat, Hutagalung, dan
+                  Panggabean.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="reveal overflow-hidden rounded-[15px] border border-white/10 bg-white/5 transition hover:-translate-y-2.5 hover:border-[#c0392b] hover:bg-white/10"
+              style={{ transitionDelay: '0.2s' }}
+            >
+              <div className="h-[220px] overflow-hidden">
+                <img
+                  src={kampung}
+                  alt="Daerah Asal"
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="p-8">
+                <h3 className="mb-4 text-[1.4rem] font-semibold text-[#f1c40f]">Daerah Asal</h3>
+                <p className="text-[0.95rem] text-[#ccc]">
+                  Marga Tobing (atau lengkapnya Lumbantobing) berasal dari daerah Pearaja, Tarutung, Tapanuli
+                  Utara, Sumatera Utara
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="keluarga" className="bg-[#fdfbf7] py-[100px] text-[#111111]">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="reveal text-center">
+            <h2 className="mb-4 inline-block bg-gradient-to-r from-[#f1c40f] to-[#111111] bg-clip-text text-5xl font-serif font-bold text-transparent">
+              Pengurus
+            </h2>
+            <p className="mx-auto mb-16 max-w-[600px] text-[1.1rem] text-[#666]">
+              Kumpulan Anggota Keluarga Besar Marga Tobing O.R. Jae Jae
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="reveal overflow-hidden rounded-[15px] bg-white pb-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition hover:-translate-y-3.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)]">
+              <div className="h-[350px] overflow-hidden bg-[#eee]">
+                <img
+                  src={anonim}
+                  alt="Foto Anggota"
+                  className="h-full w-full object-cover object-top transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="px-5 pt-6">
+                <span className="mb-2 block text-sm font-bold uppercase tracking-[1px] text-[#c0392b]">
+                  Ketua Adat
+                </span>
+                <h3 className="mb-1 font-serif text-[1.4rem] font-bold text-[#111111]">R. Lumban Tobing</h3>
+                <div className="text-sm text-[#777]">Medan, Sumatera Utara</div>
+              </div>
+            </div>
+
+            <div
+              className="reveal overflow-hidden rounded-[15px] bg-white pb-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition hover:-translate-y-3.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+              style={{ transitionDelay: '0.1s' }}
+            >
+              <div className="h-[350px] overflow-hidden bg-[#eee]">
+                <img
+                  src={anonim}
+                  alt="Foto Anggota"
+                  className="h-full w-full object-cover object-top transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="px-5 pt-6">
+                <span className="mb-2 block text-sm font-bold uppercase tracking-[1px] text-[#c0392b]">
+                  Ketua Panitia
+                </span>
+                <h3 className="mb-1 font-serif text-[1.4rem] font-bold text-[#111111]">J. Lumban Tobing</h3>
+                <div className="text-sm text-[#777]">Jakarta, DKI Jakarta</div>
+              </div>
+            </div>
+
+            <div
+              className="reveal overflow-hidden rounded-[15px] bg-white pb-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition hover:-translate-y-3.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+              style={{ transitionDelay: '0.2s' }}
+            >
+              <div className="h-[350px] overflow-hidden bg-[#eee]">
+                <img
+                  src={anonim}
+                  alt="Foto Anggota"
+                  className="h-full w-full object-cover object-top transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="px-5 pt-6">
+                <span className="mb-2 block text-sm font-bold uppercase tracking-[1px] text-[#c0392b]">
+                  Sekretaris
+                </span>
+                <h3 className="mb-1 font-serif text-[1.4rem] font-bold text-[#111111]">
+                  S. Lumban Tobing, S.E.
+                </h3>
+                <div className="text-sm text-[#777]">Bandung, Jawa Barat</div>
+              </div>
+            </div>
+
+            <div
+              className="reveal overflow-hidden rounded-[15px] bg-white pb-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition hover:-translate-y-3.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+              style={{ transitionDelay: '0.3s' }}
+            >
+              <div className="h-[350px] overflow-hidden bg-[#eee]">
+                <img
+                  src={anonim}
+                  alt="Foto Anggota"
+                  className="h-full w-full object-cover object-top transition-transform duration-500 hover:scale-110"
+                />
+              </div>
+              <div className="px-5 pt-6">
+                <span className="mb-2 block text-sm font-bold uppercase tracking-[1px] text-[#c0392b]">
+                  Kadis Seni Budaya
+                </span>
+                <h3 className="mb-1 font-serif text-[1.4rem] font-bold text-[#111111]">St. Lumban Tobing</h3>
+                <div className="text-sm text-[#777]">Pematang Siantar</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="reveal mt-12 text-center">
+            <a
+              href="#"
+              className="inline-block rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b]"
+            >
+              Lihat Seluruh Anggota
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="gabung" className="bg-join py-[100px] text-white">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="reveal text-center">
+            <h2 className="mb-4 inline-block bg-gradient-to-r from-[#f1c40f] to-white bg-clip-text text-5xl font-serif font-bold text-transparent">
+              Bergabung Bersama Kami
+            </h2>
+            <p className="mx-auto mb-16 max-w-[600px] text-[1.1rem] text-[#ccc]">
+              Silakan isi data diri Anda untuk terdaftar dalam database Marga Tobing O.R. Jae Jae.
+            </p>
+          </div>
+
+          <div className="reveal mx-auto max-w-[600px] rounded-[20px] border border-white/10 bg-white/5 p-12 shadow-[0_25px_50px_rgba(0,0,0,0.5)] backdrop-blur-[15px] max-md:p-8">
+            <form action="#" method="POST" onSubmit={handleSubmit}>
+              <div className="mb-6">
+                <label htmlFor="nama" className="mb-2 block text-sm font-semibold text-[#f1c40f]">
+                  Nama Lengkap (Beserta Marga)
+                </label>
+                <input
+                  type="text"
+                  id="nama"
+                  placeholder="Contoh: Jhon Lumban Tobing"
+                  required
+                  className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-[#f1c40f]">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="email@contoh.com"
+                  required
+                  className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="asal" className="mb-2 block text-sm font-semibold text-[#f1c40f]">
+                  Domisili (Kota)
+                </label>
+                <input
+                  type="text"
+                  id="asal"
+                  placeholder="Kota Anda saat ini"
+                  className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="pesan" className="mb-2 block text-sm font-semibold text-[#f1c40f]">
+                  Pesan / Kontribusi
+                </label>
+                <textarea
+                  id="pesan"
+                  rows={4}
+                  placeholder="Ceritakan minat Anda bergabung..."
+                  className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="inline-block w-full rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b]"
+                >
+                  Kirim Data
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <footer id="kontak" className="border-t border-white/5 bg-[#050505] pb-8 pt-20 text-[#888]">
+        <div className="mx-auto max-w-[1200px] px-5">
+          <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-3">
+            <div>
+              <h3 className="relative mb-6 text-[1.4rem] font-serif font-bold text-white after:mt-2 after:block after:h-[3px] after:w-10 after:bg-[#c0392b] after:content-['']">
+                Tobing O.R. Jae Jae
+              </h3>
+              <p>
+                Wadah modern untuk persaudaraan yang tak lekang oleh waktu. Menjaga identitas Batak di tengah
+                arus globalisasi.
+              </p>
+            </div>
+            <div>
+              <h3 className="relative mb-6 text-[1.4rem] font-serif font-bold text-white after:mt-2 after:block after:h-[3px] after:w-10 after:bg-[#c0392b] after:content-['']">
+                Navigasi
+              </h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#beranda" className="text-[0.95rem] transition hover:pl-1 hover:text-[#f1c40f]">
+                    Beranda
+                  </a>
+                </li>
+                <li>
+                  <a href="#filosofi" className="text-[0.95rem] transition hover:pl-1 hover:text-[#f1c40f]">
+                    Sejarah Marga
+                  </a>
+                </li>
+                <li>
+                  <a href="#silsilah" className="text-[0.95rem] transition hover:pl-1 hover:text-[#f1c40f]">
+                    Silsilah Tobing
+                  </a>
+                </li>
+                <li>
+                  <a href="#keluarga" className="text-[0.95rem] transition hover:pl-1 hover:text-[#f1c40f]">
+                    Data Keluarga
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="relative mb-6 text-[1.4rem] font-serif font-bold text-white after:mt-2 after:block after:h-[3px] after:w-10 after:bg-[#c0392b] after:content-['']">
+                Hubungi Kami
+              </h3>
+              <ul className="space-y-3 text-[0.95rem]">
+                <li>Jl. Batak No. 123, Medan</li>
+                <li>Email: info@lumbantobing.orj.id</li>
+                <li>WhatsApp: +62 812 3456 7890</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-white/5 pt-8 text-center text-sm">
+            <p>&copy; 2023 Persatuan Marga Tobing O.R. Jae Jae. All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </>
+  )
+}
+
+export default App

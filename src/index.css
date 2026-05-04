@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply font-sans bg-[#111111] text-white overflow-x-hidden leading-relaxed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif font-bold text-white;
+  }
+}
+
+@layer components {
+  .reveal {
+    @apply opacity-0 translate-y-12 transition-all duration-1000 ease-out;
+  }
+
+  .reveal.active {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .reveal-left {
+    @apply opacity-0 -translate-x-12 transition-all duration-1000 ease-out;
+  }
+
+  .reveal-right {
+    @apply opacity-0 translate-x-12 transition-all duration-1000 ease-out;
+  }
+
+  .reveal-left.active,
+  .reveal-right.active {
+    @apply opacity-100 translate-x-0;
+  }
+
+  .silsilah-flow-container {
+    position: relative;
+    background: transparent;
+  }
+
+  .silsilah-transform-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+    transition: transform 0.1s ease-out;
+  }
+
+  .silsilah-connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  .silsilah-connection-path {
+    fill: none;
+    stroke: #111111;
+    stroke-width: 1.5px;
+    stroke-linecap: square;
+  }
+
+  .silsilah-flow-anim {
+    fill: none;
+    stroke: rgba(17, 17, 17, 0.35);
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-dasharray: 8 140;
+    stroke-dashoffset: 148;
+    animation: silsilahFlowMove 1.8s linear infinite;
+    opacity: 1;
+  }
+
+  .silsilah-nodes-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  .silsilah-node {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #111111;
+    border-radius: 0;
+    padding: 0 10px;
+    width: 160px;
+    height: 32px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: none;
+    transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    color: #111111;
+  }
+
+  .silsilah-node:hover {
+    border-color: #111111;
+    z-index: 10;
+  }
+
+  .silsilah-node.active {
+    border-color: #111111;
+  }
+
+  .silsilah-node-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .silsilah-node-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: background 0.3s;
+  }
+
+  .silsilah-node:hover .silsilah-node-icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .silsilah-node-icon-svg {
+    width: 28px;
+    height: 28px;
+    fill: #dddddd;
+  }
+
+  .silsilah-node-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+
+  .silsilah-node-subtitle {
+    font-size: 10px;
+    color: #aaaaaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .silsilah-port {
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 2px solid #383838;
+  }
+
+  .silsilah-port-in {
+    top: -6px;
+  }
+
+  .silsilah-port-out {
+    bottom: -6px;
+  }
+}
+
+@keyframes silsilahFlowMove {
+  to {
+    stroke-dashoffset: -148;
+  }
+}
+
+@keyframes silsilahNodeEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .bg-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)),
+      url('./assets/foto1.jpeg') no-repeat center center / cover fixed;
+  }
+
+  .bg-join {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)),
+      url('https://picsum.photos/seed/pattern/1920/600');
+    background-size: cover;
+    background-attachment: fixed;
+  }
+}
