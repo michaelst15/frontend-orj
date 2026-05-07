@@ -354,14 +354,14 @@ function App() {
   const [loginPassword, setLoginPassword] = useState('')
   const [adminAuthed, setAdminAuthed] = useState(() => {
     try {
-      return window.sessionStorage.getItem('adminAuthed') === '1'
+      return window.localStorage.getItem('adminAuthed') === '1'
     } catch {
       return false
     }
   })
   const [adminEmail, setAdminEmail] = useState(() => {
     try {
-      return window.sessionStorage.getItem('adminEmail') || ''
+      return window.localStorage.getItem('adminEmail') || ''
     } catch {
       return ''
     }
@@ -533,10 +533,10 @@ function App() {
       setAdminAuthed(true)
       setAdminEmail(data.email)
       try {
-        window.sessionStorage.setItem('adminAuthed', '1')
-        window.sessionStorage.setItem('adminEmail', data.email)
-        window.sessionStorage.setItem('adminName', data.name)
-        window.sessionStorage.setItem('adminToken', data.token)
+        window.localStorage.setItem('adminAuthed', '1')
+        window.localStorage.setItem('adminEmail', data.email)
+        window.localStorage.setItem('adminName', data.name)
+        window.localStorage.setItem('adminToken', data.token)
       } catch {
         // ignore
       }
@@ -555,7 +555,7 @@ function App() {
     const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
     const apiBaseUrl = defaultApiBaseUrl
 
-    const token = window.sessionStorage.getItem('adminToken') || ''
+    const token = window.localStorage.getItem('adminToken') || ''
     if (token) {
       try {
         await fetch(`${apiBaseUrl}/api/auth/logout`, {
@@ -570,10 +570,10 @@ function App() {
     setAdminAuthed(false)
     setAdminEmail('')
     try {
-      window.sessionStorage.removeItem('adminAuthed')
-      window.sessionStorage.removeItem('adminEmail')
-      window.sessionStorage.removeItem('adminName')
-      window.sessionStorage.removeItem('adminToken')
+      window.localStorage.removeItem('adminAuthed')
+      window.localStorage.removeItem('adminEmail')
+      window.localStorage.removeItem('adminName')
+      window.localStorage.removeItem('adminToken')
     } catch {
       // ignore
     }

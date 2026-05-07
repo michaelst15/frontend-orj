@@ -38,14 +38,14 @@ const MetricValue = ({ value, className, spinnerClassName = 'h-5 w-5' }) => {
 export default function Dashboard({ adminEmail, onLogout }) {
   const [adminName, setAdminName] = useState(() => {
     try {
-      return window.sessionStorage.getItem('adminName') || ''
+      return window.localStorage.getItem('adminName') || ''
     } catch {
       return ''
     }
   })
   const [adminToken, setAdminToken] = useState(() => {
     try {
-      return window.sessionStorage.getItem('adminToken') || ''
+      return window.localStorage.getItem('adminToken') || ''
     } catch {
       return ''
     }
