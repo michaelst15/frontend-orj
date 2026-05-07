@@ -1377,7 +1377,22 @@ export default function Dashboard({ adminEmail, onLogout }) {
           <div className="min-w-0 flex-1 space-y-6">
             {activeMenu === 'data' ? (
               <>
-                <div className="overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.01]">
+                <div className="overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.01] relative">
+                  <button
+                    type="button"
+                    onClick={() => setRefreshDataKey(prev => prev + 1)}
+                    className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={dataLoading}
+                  >
+                    {dataLoading ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                        <path d="M21 3v5h-5" />
+                      </svg>
+                    )}
+                  </button>
                   <div className="flex flex-col gap-8 px-6 py-6 md:flex-row md:items-center md:justify-between">
                     <div>
                       <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold uppercase tracking-[1px] text-[#c0392b]">
@@ -1432,19 +1447,17 @@ export default function Dashboard({ adminEmail, onLogout }) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setRefreshDataKey(prev => prev + 1)}
+                        onClick={() => {
+                          setImportOpen(true)
+                          setImportError('')
+                          setImportResult(null)
+                        }}
                         className={actionButtonClass}
-                        disabled={dataLoading}
+                        disabled
+                        style={{ opacity: 0.4, cursor: 'not-allowed' }}
                       >
-                        {dataLoading ? (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
-                            <span>Memuat</span>
-                          </span>
-                        ) : (
-                          'Reload'
-                        )}
-                        <div className="mt-1 text-xs font-normal text-black/60">Refresh data</div>
+                        Import Excel
+                        <div className="mt-1 text-xs font-normal text-black/60">Buat tabel</div>
                       </button>
                     </div>
                   </div>
@@ -2010,7 +2023,22 @@ export default function Dashboard({ adminEmail, onLogout }) {
 
             {activeMenu === 'presentasi' ? (
               <>
-                <div className="overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.01]">
+                <div className="overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.01] relative">
+                  <button
+                    type="button"
+                    onClick={() => setRefreshPresentasiKey(prev => prev + 1)}
+                    className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={presentasiLoading}
+                  >
+                    {presentasiLoading ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                        <path d="M21 3v5h-5" />
+                      </svg>
+                    )}
+                  </button>
                   <div className="flex flex-col gap-6 px-6 py-6 md:flex-row md:items-center md:justify-between">
                     <div>
                       <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold uppercase tracking-[1px] text-[#c0392b]">
@@ -2036,22 +2064,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
                         </span>{' '}
                         KK
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setRefreshPresentasiKey(prev => prev + 1)}
-                        className={actionButtonClass}
-                        disabled={presentasiLoading}
-                      >
-                        {presentasiLoading ? (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
-                            <span>Memuat</span>
-                          </span>
-                        ) : (
-                          'Reload'
-                        )}
-                        <div className="mt-1 text-xs font-normal text-black/60">Refresh data</div>
-                      </button>
                       <button
                         type="button"
                         className={actionButtonClass}
