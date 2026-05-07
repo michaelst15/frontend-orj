@@ -126,6 +126,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const [exportPdfLoading, setExportPdfLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(false)
   const [presentasiLoading, setPresentasiLoading] = useState(false)
+  const [refreshDataKey, setRefreshDataKey] = useState(0)
+  const [refreshPresentasiKey, setRefreshPresentasiKey] = useState(0)
 
   const handleExportPdf = async () => {
     setExportPdfLoading(true)
@@ -306,12 +308,10 @@ export default function Dashboard({ adminEmail, onLogout }) {
     }
 
     load()
-    const id = window.setInterval(load, 10_000)
     return () => {
       cancelled = true
-      window.clearInterval(id)
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiRekapHadir])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshDataKey])
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000)
@@ -321,10 +321,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
   useEffect(() => {
     if (activeMenu !== 'absensi') return
     let cancelled = false
-    let spinnerTimeoutId = null
 
     const load = async () => {
-      const startedAt = Date.now()
       setAbsensiFamiliesLoading(true)
       try {
         const response = await fetchWithAuth(`${apiBaseUrl}/api/absensi/keluarga`)
@@ -374,20 +372,13 @@ export default function Dashboard({ adminEmail, onLogout }) {
           }
         }
       } finally {
-        const elapsed = Date.now() - startedAt
-        const minSpinnerMs = 700
-        const waitMs = Math.max(0, minSpinnerMs - elapsed)
-        if (spinnerTimeoutId) window.clearTimeout(spinnerTimeoutId)
-        spinnerTimeoutId = window.setTimeout(() => {
-          if (!cancelled) setAbsensiFamiliesLoading(false)
-        }, waitMs)
+        if (!cancelled) setAbsensiFamiliesLoading(false)
       }
     }
 
     load()
     return () => {
       cancelled = true
-      if (spinnerTimeoutId) window.clearTimeout(spinnerTimeoutId)
     }
   }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiRekapHadir])
 
@@ -586,12 +577,10 @@ export default function Dashboard({ adminEmail, onLogout }) {
     }
 
     load()
-    const id = window.setInterval(load, 5000)
     return () => {
       cancelled = true
-      window.clearInterval(id)
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshPresentasiKey])
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -1443,17 +1432,19 @@ export default function Dashboard({ adminEmail, onLogout }) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          setImportOpen(true)
-                          setImportError('')
-                          setImportResult(null)
-                        }}
+                        onClick={() => setRefreshDataKey(prev => prev + 1)}
                         className={actionButtonClass}
-                        disabled
-                        style={{ opacity: 0.4, cursor: 'not-allowed' }}
+                        disabled={dataLoading}
                       >
-                        Import Excel
-                        <div className="mt-1 text-xs font-normal text-black/60">Buat tabel</div>
+                        {dataLoading ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                            <span>Memuat</span>
+                          </span>
+                        ) : (
+                          'Reload'
+                        )}
+                        <div className="mt-1 text-xs font-normal text-black/60">Refresh data</div>
                       </button>
                     </div>
                   </div>
@@ -2045,6 +2036,22 @@ export default function Dashboard({ adminEmail, onLogout }) {
                         </span>{' '}
                         KK
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => setRefreshPresentasiKey(prev => prev + 1)}
+                        className={actionButtonClass}
+                        disabled={presentasiLoading}
+                      >
+                        {presentasiLoading ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                            <span>Memuat</span>
+                          </span>
+                        ) : (
+                          'Reload'
+                        )}
+                        <div className="mt-1 text-xs font-normal text-black/60">Refresh data</div>
+                      </button>
                       <button
                         type="button"
                         className={actionButtonClass}
