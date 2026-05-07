@@ -124,6 +124,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const [absensiRekapHadir, setAbsensiRekapHadir] = useState(null)
   const [dbAbsensiFamiliesCount, setDbAbsensiFamiliesCount] = useState(null)
   const [exportPdfLoading, setExportPdfLoading] = useState(false)
+  const [dataLoading, setDataLoading] = useState(false)
+  const [presentasiLoading, setPresentasiLoading] = useState(false)
 
   const handleExportPdf = async () => {
     setExportPdfLoading(true)
@@ -265,6 +267,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
     let cancelled = false
 
     const load = async () => {
+      setDataLoading(true)
       try {
         const response = await fetchWithAuth(`${apiBaseUrl}/api/metrics`)
         const raw = await response.text()
@@ -297,6 +300,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
         if (!cancelled) setMetricsError('')
       } catch {
         if (!cancelled) setMetricsError('')
+      } finally {
+        if (!cancelled) setDataLoading(false)
       }
     }
 
@@ -508,6 +513,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
     let cancelled = false
 
     const load = async () => {
+      setPresentasiLoading(true)
       try {
         const buildApiBaseUrl = (port) => `${window.location.protocol}//${window.location.hostname}:${port}`
         const fetchKehadiranMetrics = async (base) => fetchWithAuth(`${base}/api/kehadiran/metrics`, { cache: 'no-store' })
@@ -574,6 +580,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
         if (!cancelled) {
           setPresentasiKehadiran(null)
         }
+      } finally {
+        if (!cancelled) setPresentasiLoading(false)
       }
     }
 
@@ -1451,119 +1459,125 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   </div>
                 </div>
 
-                <section className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                  <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
-                    <div className="text-sm font-semibold text-black/70">Jumlah Data Keluarga</div>
-                    <MetricValue
-                      value={metrics.families}
-                      className="mt-2 text-3xl font-black tabular-nums tracking-tight"
-                      spinnerClassName="h-6 w-6"
-                    />
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/10">
-                      <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-[#c0392b] to-[#f1c40f]" />
-                    </div>
-                    <div className="mt-2 text-xs text-black/55">
-                      {metricsError ? metricsError : 'Update otomatis'}
-                    </div>
+                {dataLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <span className="h-10 w-10 animate-spin rounded-full border-3 border-black/20 border-t-black/60" />
                   </div>
-
-                  <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
-                    <div className="text-sm font-semibold text-black/70">Jumlah Data Ruas ORJ</div>
-                    <MetricValue
-                      value={metrics.ruasOrj}
-                      className="mt-2 text-3xl font-black tabular-nums tracking-tight"
-                      spinnerClassName="h-6 w-6"
-                    />
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/10">
-                      <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-[#c0392b] to-[#f1c40f]" />
+                ) : (
+                  <section className="grid grid-cols-1 gap-6 md:grid-cols-4">
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
+                      <div className="text-sm font-semibold text-black/70">Jumlah Data Keluarga</div>
+                      <MetricValue
+                        value={metrics.families}
+                        className="mt-2 text-3xl font-black tabular-nums tracking-tight"
+                        spinnerClassName="h-6 w-6"
+                      />
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/10">
+                        <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-[#c0392b] to-[#f1c40f]" />
+                      </div>
+                      <div className="mt-2 text-xs text-black/55">
+                        {metricsError ? metricsError : 'Update otomatis'}
+                      </div>
                     </div>
-                    <div className="mt-2 text-xs text-black/55">Update otomatis</div>
-                  </div>
 
-                  <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
-                    <div className="text-sm font-semibold text-black/70">Keluarga</div>
-                    <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
-                      <div className="grid grid-cols-2">
-                        <div className="min-w-0 px-4 py-3">
-                          <div className="text-xs font-semibold text-black/55">Suami</div>
-                          <MetricValue
-                            value={metrics.keluargaSuami}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
+                      <div className="text-sm font-semibold text-black/70">Jumlah Data Ruas ORJ</div>
+                      <MetricValue
+                        value={metrics.ruasOrj}
+                        className="mt-2 text-3xl font-black tabular-nums tracking-tight"
+                        spinnerClassName="h-6 w-6"
+                      />
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/10">
+                        <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-[#c0392b] to-[#f1c40f]" />
+                      </div>
+                      <div className="mt-2 text-xs text-black/55">Update otomatis</div>
+                    </div>
+
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
+                      <div className="text-sm font-semibold text-black/70">Keluarga</div>
+                      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
+                        <div className="grid grid-cols-2">
+                          <div className="min-w-0 px-4 py-3">
+                            <div className="text-xs font-semibold text-black/55">Suami</div>
+                            <MetricValue
+                              value={metrics.keluargaSuami}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
+                          <div className="min-w-0 border-l border-black/10 px-4 py-3">
+                            <div className="text-xs font-semibold text-black/55">Isteri</div>
+                            <MetricValue
+                              value={metrics.keluargaIstri}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
                         </div>
-                        <div className="min-w-0 border-l border-black/10 px-4 py-3">
-                          <div className="text-xs font-semibold text-black/55">Isteri</div>
-                          <MetricValue
-                            value={metrics.keluargaIstri}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
+                      </div>
+                      <div className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
+                        <div className="grid grid-cols-2">
+                          <div className="min-w-0 px-3 py-3 md:px-4">
+                            <div className="text-xs font-semibold text-black/55">Anak</div>
+                            <MetricValue
+                              value={metrics.keluargaAnak}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
+                          <div className="min-w-0 border-l border-black/10 px-3 py-3 md:px-4">
+                            <div className="text-xs font-semibold text-black/55">Boru</div>
+                            <MetricValue
+                              value={metrics.keluargaBoru}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
+                          <div className="min-w-0 border-t border-black/10 px-3 py-3 md:px-4">
+                            <div className="text-xs font-semibold text-black/55">Dolidoli</div>
+                            <MetricValue
+                              value={metrics.keluargaDolidoli}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
+                          <div className="min-w-0 border-l border-t border-black/10 px-3 py-3 md:px-4">
+                            <div className="text-[11px] font-semibold leading-none text-black/55">Namabaju</div>
+                            <MetricValue
+                              value={metrics.keluargaNamabaju}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
-                      <div className="grid grid-cols-2">
-                        <div className="min-w-0 px-3 py-3 md:px-4">
-                          <div className="text-xs font-semibold text-black/55">Anak</div>
-                          <MetricValue
-                            value={metrics.keluargaAnak}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
-                        </div>
-                        <div className="min-w-0 border-l border-black/10 px-3 py-3 md:px-4">
-                          <div className="text-xs font-semibold text-black/55">Boru</div>
-                          <MetricValue
-                            value={metrics.keluargaBoru}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
-                        </div>
-                        <div className="min-w-0 border-t border-black/10 px-3 py-3 md:px-4">
-                          <div className="text-xs font-semibold text-black/55">Dolidoli</div>
-                          <MetricValue
-                            value={metrics.keluargaDolidoli}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
-                        </div>
-                        <div className="min-w-0 border-l border-t border-black/10 px-3 py-3 md:px-4">
-                          <div className="text-[11px] font-semibold leading-none text-black/55">Namabaju</div>
-                          <MetricValue
-                            value={metrics.keluargaNamabaju}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
-                    <div className="text-sm font-semibold text-black/70">Ruas ORJ</div>
-                    <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
-                      <div className="grid grid-cols-2">
-                        <div className="min-w-0 px-4 py-3">
-                          <div className="text-xs font-semibold text-black/55">Anak</div>
-                          <MetricValue
-                            value={metrics.ruasOrjAnak}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
-                        </div>
-                        <div className="min-w-0 border-l border-black/10 px-4 py-3">
-                          <div className="text-xs font-semibold text-black/55">Boru</div>
-                          <MetricValue
-                            value={metrics.ruasOrjBoru}
-                            className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
-                            spinnerClassName="h-4 w-4"
-                          />
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6">
+                      <div className="text-sm font-semibold text-black/70">Ruas ORJ</div>
+                      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-black/[0.03]">
+                        <div className="grid grid-cols-2">
+                          <div className="min-w-0 px-4 py-3">
+                            <div className="text-xs font-semibold text-black/55">Anak</div>
+                            <MetricValue
+                              value={metrics.ruasOrjAnak}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
+                          <div className="min-w-0 border-l border-black/10 px-4 py-3">
+                            <div className="text-xs font-semibold text-black/55">Boru</div>
+                            <MetricValue
+                              value={metrics.ruasOrjBoru}
+                              className="mt-1 whitespace-nowrap text-[clamp(0.9rem,2.6vw,1.15rem)] font-black tabular-nums leading-none tracking-tight"
+                              spinnerClassName="h-4 w-4"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </section>
+                  </section>
+                )}
               </>
             ) : null}
 
@@ -1583,18 +1597,13 @@ export default function Dashboard({ adminEmail, onLogout }) {
                     <div className="p-4">
                       <div className="h-[420px] overflow-hidden rounded-xl border border-black/10 bg-[#f7f1dd]">
                         <div className="h-full overflow-y-auto p-3">
-                          {absensiFamiliesLoading ? (
+                          {absensiFamiliesLoading || absensiFamilies.length === 0 ? (
                             <div className="flex items-center justify-center py-10">
                               <span className="h-6 w-6 animate-spin rounded-full border-2 border-black/20 border-t-black/60" />
                             </div>
                           ) : absensiFamiliesError ? (
                             <div className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-4 text-sm text-black/70">
                               {absensiFamiliesError}
-                            </div>
-                          ) : absensiFamilies.length === 0 ? (
-                            <div className="rounded-xl border border-dashed border-black/15 bg-black/[0.02] px-4 py-6 text-center">
-                              <div className="text-sm font-semibold text-black/80">Data keluarga belum ada</div>
-                              <div className="mt-1 text-xs text-black/55">Pastikan tabel keluarga sudah terisi.</div>
                             </div>
                           ) : absensiFamiliesVisible.length === 0 ? (
                             <div className="rounded-xl border border-dashed border-black/15 bg-black/[0.02] px-4 py-6 text-center">
@@ -2055,145 +2064,151 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                  <section className="overflow-hidden rounded-2xl border border-black/10 bg-white p-6 lg:col-span-2">
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <div className="text-sm font-semibold text-black/70">Progres KK</div>
-                        <div className="mt-1 font-['Space_Grotesk'] text-2xl font-extrabold tracking-tight text-black/90">
-                          Terdata vs Target
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm font-semibold text-black/70">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="h-2.5 w-2.5 rounded-full bg-[#f1c40f]" />
-                          Terdata
-                        </span>
-                        <span className="inline-flex items-center gap-2">
-                          <span className="h-2.5 w-2.5 rounded-full bg-black/10" />
-                          Sisa
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr] md:items-center">
-                      <div className="flex items-center justify-center">
-                        {typeof presentasiKehadiran?.kk !== 'number' || typeof dbAbsensiFamiliesCount !== 'number' ? (
-                          <span className="h-10 w-10 animate-spin rounded-full border-2 border-black/20 border-t-black/60" />
-                        ) : (
-                          (() => {
-                            const target = dbAbsensiFamiliesCount
-                            const total = presentasiKehadiran.kk
-                            const pct = target > 0 ? Math.max(0, Math.min(100, (total / target) * 100)) : 0
-                            const pctText = `${pct.toFixed(1)}%`
-                            return (
-                              <div className="relative h-44 w-44">
-                                <div
-                                  className="h-full w-full rounded-full border border-black/10"
-                                  style={{
-                                    background: `conic-gradient(#f1c40f ${pct}%, rgba(0,0,0,0.08) 0)`,
-                                  }}
-                                />
-                                <div className="absolute inset-4 rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]" />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                  <div className="text-xs font-semibold uppercase tracking-[2px] text-black/60">
-                                    Progres
-                                  </div>
-                                  <div className="mt-1 font-['Space_Grotesk'] text-3xl font-black tracking-tight text-black">
-                                    {pctText}
-                                  </div>
-                                  <div className="mt-1 text-xs text-black/55">
-                                    {total.toLocaleString('id-ID')} / {target.toLocaleString('id-ID')} KK
-                                  </div>
-                                </div>
-                              </div>
-                            )
-                          })()
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        {typeof presentasiKehadiran?.kk !== 'number' || typeof dbAbsensiFamiliesCount !== 'number' ? (
-                          <div className="space-y-3">
-                            <div className="h-3 w-full animate-pulse rounded-full bg-black/10" />
-                            <div className="h-3 w-5/6 animate-pulse rounded-full bg-black/10" />
-                            <div className="h-3 w-2/3 animate-pulse rounded-full bg-black/10" />
-                          </div>
-                        ) : (
-                          (() => {
-                            const target = dbAbsensiFamiliesCount
-                            const total = presentasiKehadiran.kk
-                            const sisa = Math.max(0, target - total)
-                            const pct = target > 0 ? Math.max(0, Math.min(100, (total / target) * 100)) : 0
-                            return (
-                              <div className="space-y-4">
-                                <div className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="text-sm font-semibold text-black/70">Terdata</div>
-                                    <div className="text-lg font-black tabular-nums text-black">
-                                      {total.toLocaleString('id-ID')}
-                                    </div>
-                                  </div>
-                                  <div className="mt-3 h-3 overflow-hidden rounded-full bg-black/10">
-                                    <div
-                                      className="h-full rounded-full bg-gradient-to-r from-[#f1c40f] to-[#f7d46a]"
-                                      style={{ width: `${pct}%` }}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="text-sm font-semibold text-black/70">Sisa ke Target</div>
-                                    <div className="text-lg font-black tabular-nums text-black">
-                                      {sisa.toLocaleString('id-ID')}
-                                    </div>
-                                  </div>
-                                  <div className="mt-3 h-3 overflow-hidden rounded-full bg-black/10">
-                                    <div
-                                      className="h-full rounded-full bg-black/20"
-                                      style={{ width: `${100 - pct}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            )
-                          })()
-                        )}
-                      </div>
-                    </div>
-                  </section>
-
-                  <aside className="overflow-hidden rounded-2xl border border-black/10 bg-white p-6">
-                    <div className="text-sm font-semibold text-black/70">Status Data</div>
-                    <div className="mt-1 font-['Space_Grotesk'] text-2xl font-extrabold tracking-tight text-black/90">
-                      Kehadiran
-                    </div>
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                        <div className="text-xs font-extrabold uppercase tracking-[2px] text-black/60">
-                          Data Kehadiran
-                        </div>
-                        <div className="mt-2 text-sm text-black/65">
-                          Grafik ini akan terisi otomatis setelah data kehadiran (dewasa/anak) mulai dicatat.
-                        </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm font-semibold text-black/70">Terdata KK</div>
-                          <div className="text-base font-black tabular-nums text-black">
-                            {typeof presentasiKehadiran?.kk === 'number' ? presentasiKehadiran.kk.toLocaleString('id-ID') : '—'}
+                {presentasiLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <span className="h-10 w-10 animate-spin rounded-full border-3 border-black/20 border-t-black/60" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <section className="overflow-hidden rounded-2xl border border-black/10 bg-white p-6 lg:col-span-2">
+                      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-black/70">Progres KK</div>
+                          <div className="mt-1 font-['Space_Grotesk'] text-2xl font-extrabold tracking-tight text-black/90">
+                            Terdata vs Target
                           </div>
                         </div>
-                        <div className="mt-3 flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-[#f1c40f]" />
-                          <div className="text-xs font-semibold text-black/60">Sumber: tabel daftar_kehadiran</div>
+                        <div className="flex items-center gap-3 text-sm font-semibold text-black/70">
+                          <span className="inline-flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full bg-[#f1c40f]" />
+                            Terdata
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full bg-black/10" />
+                            Sisa
+                          </span>
                         </div>
                       </div>
-                    </div>
-                  </aside>
-                </div>
+
+                      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr] md:items-center">
+                        <div className="flex items-center justify-center">
+                          {typeof presentasiKehadiran?.kk !== 'number' || typeof dbAbsensiFamiliesCount !== 'number' ? (
+                            <span className="h-10 w-10 animate-spin rounded-full border-2 border-black/20 border-t-black/60" />
+                          ) : (
+                            (() => {
+                              const target = dbAbsensiFamiliesCount
+                              const total = presentasiKehadiran.kk
+                              const pct = target > 0 ? Math.max(0, Math.min(100, (total / target) * 100)) : 0
+                              const pctText = `${pct.toFixed(1)}%`
+                              return (
+                                <div className="relative h-44 w-44">
+                                  <div
+                                    className="h-full w-full rounded-full border border-black/10"
+                                    style={{
+                                      background: `conic-gradient(#f1c40f ${pct}%, rgba(0,0,0,0.08) 0)`,
+                                    }}
+                                  />
+                                  <div className="absolute inset-4 rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]" />
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                    <div className="text-xs font-semibold uppercase tracking-[2px] text-black/60">
+                                      Progres
+                                    </div>
+                                    <div className="mt-1 font-['Space_Grotesk'] text-3xl font-black tracking-tight text-black">
+                                      {pctText}
+                                    </div>
+                                    <div className="mt-1 text-xs text-black/55">
+                                      {total.toLocaleString('id-ID')} / {target.toLocaleString('id-ID')} KK
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })()
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          {typeof presentasiKehadiran?.kk !== 'number' || typeof dbAbsensiFamiliesCount !== 'number' ? (
+                            <div className="space-y-3">
+                              <div className="h-3 w-full animate-pulse rounded-full bg-black/10" />
+                              <div className="h-3 w-5/6 animate-pulse rounded-full bg-black/10" />
+                              <div className="h-3 w-2/3 animate-pulse rounded-full bg-black/10" />
+                            </div>
+                          ) : (
+                            (() => {
+                              const target = dbAbsensiFamiliesCount
+                              const total = presentasiKehadiran.kk
+                              const sisa = Math.max(0, target - total)
+                              const pct = target > 0 ? Math.max(0, Math.min(100, (total / target) * 100)) : 0
+                              return (
+                                <div className="space-y-4">
+                                  <div className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="text-sm font-semibold text-black/70">Terdata</div>
+                                      <div className="text-lg font-black tabular-nums text-black">
+                                        {total.toLocaleString('id-ID')}
+                                      </div>
+                                    </div>
+                                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-black/10">
+                                      <div
+                                        className="h-full rounded-full bg-gradient-to-r from-[#f1c40f] to-[#f7d46a]"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="text-sm font-semibold text-black/70">Sisa ke Target</div>
+                                      <div className="text-lg font-black tabular-nums text-black">
+                                        {sisa.toLocaleString('id-ID')}
+                                      </div>
+                                    </div>
+                                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-black/10">
+                                      <div
+                                        className="h-full rounded-full bg-black/20"
+                                        style={{ width: `${100 - pct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })()
+                          )}
+                        </div>
+                      </div>
+                    </section>
+
+                    <aside className="overflow-hidden rounded-2xl border border-black/10 bg-white p-6">
+                      <div className="text-sm font-semibold text-black/70">Status Data</div>
+                      <div className="mt-1 font-['Space_Grotesk'] text-2xl font-extrabold tracking-tight text-black/90">
+                        Kehadiran
+                      </div>
+                      <div className="mt-4 space-y-3">
+                        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+                          <div className="text-xs font-extrabold uppercase tracking-[2px] text-black/60">
+                            Data Kehadiran
+                          </div>
+                          <div className="mt-2 text-sm text-black/65">
+                            Grafik ini akan terisi otomatis setelah data kehadiran (dewasa/anak) mulai dicatat.
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm font-semibold text-black/70">Terdata KK</div>
+                            <div className="text-base font-black tabular-nums text-black">
+                              {typeof presentasiKehadiran?.kk === 'number' ? presentasiKehadiran.kk.toLocaleString('id-ID') : '—'}
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[#f1c40f]" />
+                            <div className="text-xs font-semibold text-black/60">Sumber: tabel daftar_kehadiran</div>
+                          </div>
+                        </div>
+                      </div>
+                    </aside>
+                  </div>
+                )}
               </>
             ) : null}
           </div>
