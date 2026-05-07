@@ -1441,6 +1441,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
                           setImportResult(null)
                         }}
                         className={actionButtonClass}
+                        disabled
+                        style={{ opacity: 0.4, cursor: 'not-allowed' }}
                       >
                         Import Excel
                         <div className="mt-1 text-xs font-normal text-black/60">Buat tabel</div>
