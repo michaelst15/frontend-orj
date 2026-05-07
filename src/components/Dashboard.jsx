@@ -128,6 +128,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const [presentasiLoading, setPresentasiLoading] = useState(false)
   const [refreshDataKey, setRefreshDataKey] = useState(0)
   const [refreshPresentasiKey, setRefreshPresentasiKey] = useState(0)
+  const [refreshAbsensiFamiliesKey, setRefreshAbsensiFamiliesKey] = useState(0)
+  const [refreshAbsensiKehadiranKey, setRefreshAbsensiKehadiranKey] = useState(0)
 
   const handleExportPdf = async () => {
     setExportPdfLoading(true)
@@ -380,7 +382,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiRekapHadir])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiFamiliesKey])
 
   useEffect(() => {
     if (activeMenu !== 'absensi') return
@@ -497,7 +499,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiRekapHadir])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiKehadiranKey])
 
   useEffect(() => {
     if (activeMenu !== 'presentasi') return
@@ -1588,7 +1590,22 @@ export default function Dashboard({ adminEmail, onLogout }) {
             {activeMenu === 'absensi' ? (
               <>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
-                  <section className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02]">
+                  <section className="overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] relative">
+                    <button
+                      type="button"
+                      onClick={() => setRefreshAbsensiFamiliesKey(prev => prev + 1)}
+                      className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-lg border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={absensiFamiliesLoading}
+                    >
+                      {absensiFamiliesLoading ? (
+                        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                          <path d="M21 3v5h-5" />
+                        </svg>
+                      )}
+                    </button>
                     <div className="border-b border-black/10 bg-gradient-to-r from-[#f1c40f]/20 to-[#f7d46a]/10 px-4 py-3">
                       <div className="text-center text-sm font-extrabold tracking-wide text-black/80">
                         DAFTAR ANGGOTA <span className="text-[#c0392b]">ORJ</span> (
@@ -1916,7 +1933,22 @@ export default function Dashboard({ adminEmail, onLogout }) {
                         </div>
                       </div>
 
-                      <div className="mt-6 overflow-hidden rounded-2xl border border-black/10 bg-white">
+                      <div className="mt-6 overflow-hidden rounded-2xl border border-black/10 bg-white relative">
+                        <button
+                          type="button"
+                          onClick={() => setRefreshAbsensiKehadiranKey(prev => prev + 1)}
+                          className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-lg border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={absensiKehadiranLoading}
+                        >
+                          {absensiKehadiranLoading ? (
+                            <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                          ) : (
+                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                              <path d="M21 3v5h-5" />
+                            </svg>
+                          )}
+                        </button>
                         <div className="flex flex-col gap-3 border-b border-black/10 bg-gradient-to-r from-[#f1c40f]/20 to-[#f7d46a]/10 px-4 py-3 md:flex-row md:items-center md:justify-between">
                           <div className="text-sm font-bold text-black/80">
                             DATA KEHADIRAN <span className="text-black/40">|</span>{' '}
