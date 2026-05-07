@@ -59,11 +59,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const fetchWithAuth = async (url, options = {}) => {
     const headers = { ...options.headers, ...getAuthHeaders() }
     const response = await fetch(url, { ...options, headers })
-    
-    if (response.status === 401) {
-      onLogout()
-      throw new Error('sesi tidak valid')
-    }
     return response
   }
   const [now, setNow] = useState(() => Date.now())
