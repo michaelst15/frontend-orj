@@ -577,11 +577,6 @@ function App() {
     } catch {
       // ignore
     }
-    try {
-      window.location.reload()
-    } catch {
-      // ignore
-    }
   }
 
   if (adminAuthed) {
