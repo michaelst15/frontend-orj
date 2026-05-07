@@ -370,42 +370,6 @@ function App() {
   const loginFirstFieldRef = useRef(null)
 
   useEffect(() => {
-    if (!adminAuthed) return
-
-    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
-    const apiBaseUrl = defaultApiBaseUrl
-    const isUsingProductionUrl = envApiBaseUrl !== ''
-
-    const validateToken = async () => {
-      try {
-        const token = window.sessionStorage.getItem('adminToken') || ''
-        const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
-          headers: { 'X-Session-Token': token },
-        })
-
-        if (!response.ok) {
-          setAdminAuthed(false)
-          setAdminEmail('')
-          try {
-            window.sessionStorage.removeItem('adminAuthed')
-            window.sessionStorage.removeItem('adminEmail')
-            window.sessionStorage.removeItem('adminName')
-            window.sessionStorage.removeItem('adminToken')
-          } catch {
-            // ignore
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    validateToken()
-
-  }, [adminAuthed])
-
-  useEffect(() => {
     const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
 
