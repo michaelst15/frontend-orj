@@ -1381,13 +1381,13 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setRefreshDataKey(prev => prev + 1)}
-                    className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={dataLoading}
                   >
                     {dataLoading ? (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                      <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
                     ) : (
-                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
                         <path d="M21 3v5h-5" />
                       </svg>
@@ -2027,13 +2027,13 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setRefreshPresentasiKey(prev => prev + 1)}
-                    className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={presentasiLoading}
                   >
                     {presentasiLoading ? (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                      <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
                     ) : (
-                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
                         <path d="M21 3v5h-5" />
                       </svg>
