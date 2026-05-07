@@ -1381,7 +1381,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setRefreshDataKey(prev => prev + 1)}
-                    className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="absolute top-2 right-4 flex h-8 w-8 items-center justify-center rounded-xl border border-black/10 bg-white shadow-sm transition hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={dataLoading}
                   >
                     {dataLoading ? (
