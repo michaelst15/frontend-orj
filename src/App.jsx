@@ -403,8 +403,6 @@ function App() {
 
     validateToken()
 
-    const intervalId = window.setInterval(validateToken, 10000)
-    return () => window.clearInterval(intervalId)
   }, [adminAuthed])
 
   useEffect(() => {
