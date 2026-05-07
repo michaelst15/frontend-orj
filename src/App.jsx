@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Dashboard from './components/Dashboard'
 import foto2 from './assets/foto2.jpg'
 import anonim from './assets/anonim.jpg'
 import raja from './assets/raja.jpg'
@@ -166,21 +167,6 @@ function SilsilahFlow() {
       if (node.children && node.children.length > 0) {
         node.children.forEach((child) => assignPresetCoordinates(child))
       }
-    }
-
-    const drawSegment = (x1, y1, x2, y2) => {
-      const d = `M ${x1} ${y1} L ${x2} ${y2}`
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      path.setAttribute('d', d)
-      path.classList.add('silsilah-connection-path')
-      svgLayer.appendChild(path)
-
-      const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      flowPath.setAttribute('d', d)
-      flowPath.classList.add('silsilah-flow-anim')
-      flowPath.style.animationDelay = `${Math.random() * 2}s`
-      svgLayer.appendChild(flowPath)
     }
 
     const drawNode = (node) => {
@@ -366,20 +352,82 @@ function App() {
   const [loginVisible, setLoginVisible] = useState(false)
   const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [adminAuthed, setAdminAuthed] = useState(() => {
+    try {
+      return window.sessionStorage.getItem('adminAuthed') === '1'
+    } catch {
+      return false
+    }
+  })
+  const [adminEmail, setAdminEmail] = useState(() => {
+    try {
+      return window.sessionStorage.getItem('adminEmail') || ''
+    } catch {
+      return ''
+    }
+  })
+  const [loginError, setLoginError] = useState('')
   const loginFirstFieldRef = useRef(null)
+
+  useEffect(() => {
+    if (!adminAuthed) return
+
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+    const apiBaseUrl = defaultApiBaseUrl
+
+    const validateToken = async () => {
+      try {
+        const token = window.sessionStorage.getItem('adminToken') || ''
+        const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
+          headers: { 'X-Session-Token': token },
+        })
+
+        if (!response.ok) {
+          setAdminAuthed(false)
+          setAdminEmail('')
+          try {
+            window.sessionStorage.removeItem('adminAuthed')
+            window.sessionStorage.removeItem('adminEmail')
+            window.sessionStorage.removeItem('adminName')
+            window.sessionStorage.removeItem('adminToken')
+          } catch {
+            // ignore
+          }
+          try {
+            window.location.reload()
+          } catch {
+            // ignore
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    validateToken()
+
+    const intervalId = window.setInterval(validateToken, 10000)
+    return () => window.clearInterval(intervalId)
+  }, [adminAuthed])
 
   useEffect(() => {
     const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
 
     if (reduceMotion) {
-      setLoaderText(fullText)
-      setLoaderDone(true)
+      const rafId = window.requestAnimationFrame(() => {
+        setLoaderText(fullText)
+        setLoaderDone(true)
+      })
       const timeoutId = window.setTimeout(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
         setLoaderHidden(true)
       }, 400)
-      return () => window.clearTimeout(timeoutId)
+      return () => {
+        window.cancelAnimationFrame(rafId)
+        window.clearTimeout(timeoutId)
+      }
     }
 
     let index = 0
@@ -440,6 +488,7 @@ function App() {
   const openLogin = () => {
     closeNav()
     setLoginMounted(true)
+    setLoginError('')
     requestAnimationFrame(() => setLoginVisible(true))
   }
 
@@ -476,10 +525,109 @@ function App() {
     alert('Terima kasih! Data Anda akan kami verifikasi.')
   }
 
-  const handleLoginSubmit = (event) => {
+  const handleLoginSubmit = async (event) => {
     event.preventDefault()
-    alert('Fitur masuk sedang disiapkan.')
-    closeLogin()
+
+    const email = String(loginIdentifier).trim()
+    const password = String(loginPassword)
+
+    if (!email || !password) {
+      setLoginError('Email dan password wajib diisi.')
+      return
+    }
+
+    try {
+      const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+      const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+      const apiBaseUrl = defaultApiBaseUrl
+
+      const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const raw = await response.text()
+      let data = null
+      if (raw) {
+        try {
+          data = JSON.parse(raw)
+        } catch {
+          data = null
+        }
+      }
+
+      if (response.status === 409 && data?.requireForce) {
+        setLoginError(data?.message || 'Akun sedang digunakan')
+        return
+      }
+
+      if (!response.ok || !data?.ok) {
+        setLoginError(data?.message || 'Email atau password salah.')
+        return
+      }
+
+      if (!data?.token || !data?.email || !data?.name) {
+        setLoginError('Gagal masuk. Silakan coba lagi.')
+        return
+      }
+
+      setAdminAuthed(true)
+      setAdminEmail(data.email)
+      try {
+        window.sessionStorage.setItem('adminAuthed', '1')
+        window.sessionStorage.setItem('adminEmail', data.email)
+        window.sessionStorage.setItem('adminName', data.name)
+        window.sessionStorage.setItem('adminToken', data.token)
+      } catch {
+        // ignore
+      }
+      setLoginIdentifier('')
+      setLoginPassword('')
+      setLoginError('')
+      closeLogin()
+      return
+    } catch (err) {
+      setLoginError('Terjadi kesalahan. Pastikan backend aktif di ' + apiBaseUrl)
+    }
+  }
+
+  const handleLogout = async () => {
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+    const apiBaseUrl = defaultApiBaseUrl
+
+    const token = window.sessionStorage.getItem('adminToken') || ''
+    if (token) {
+      try {
+        await fetch(`${apiBaseUrl}/api/auth/logout`, {
+          method: 'POST',
+          headers: { 'X-Session-Token': token },
+        })
+      } catch {
+        // ignore, fallback
+      }
+    }
+
+    setAdminAuthed(false)
+    setAdminEmail('')
+    try {
+      window.sessionStorage.removeItem('adminAuthed')
+      window.sessionStorage.removeItem('adminEmail')
+      window.sessionStorage.removeItem('adminName')
+      window.sessionStorage.removeItem('adminToken')
+    } catch {
+      // ignore
+    }
+    try {
+      window.location.reload()
+    } catch {
+      // ignore
+    }
+  }
+
+  if (adminAuthed) {
+    return <Dashboard adminEmail={adminEmail} onLogout={handleLogout} />
   }
 
   return (
@@ -649,6 +797,11 @@ function App() {
 
             <form className="px-6 pt-6 pb-6" onSubmit={handleLoginSubmit}>
               <div className="space-y-4">
+                {loginError ? (
+                  <div className="rounded-xl border border-[#c0392b]/30 bg-[#c0392b]/10 px-4 py-3 text-sm text-white">
+                    {loginError}
+                  </div>
+                ) : null}
                 <div>
                   <label htmlFor="login-identifier" className="mb-2 block text-sm font-semibold text-white/90">
                     Email / Username
