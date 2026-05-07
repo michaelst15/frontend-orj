@@ -375,6 +375,7 @@ function App() {
     const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
     const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
     const apiBaseUrl = defaultApiBaseUrl
+    const isUsingProductionUrl = envApiBaseUrl !== ''
 
     const validateToken = async () => {
       try {
@@ -383,7 +384,7 @@ function App() {
           headers: { 'X-Session-Token': token },
         })
 
-        if (!response.ok) {
+        if (!response.ok && !isUsingProductionUrl) {
           setAdminAuthed(false)
           setAdminEmail('')
           try {

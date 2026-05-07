@@ -59,7 +59,11 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const fetchWithAuth = async (url, options = {}) => {
     const headers = { ...options.headers, ...getAuthHeaders() }
     const response = await fetch(url, { ...options, headers })
-    if (response.status === 401) {
+    
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const isUsingProductionUrl = envApiBaseUrl !== ''
+    
+    if (response.status === 401 && !isUsingProductionUrl) {
       try {
         window.sessionStorage.removeItem('adminAuthed')
         window.sessionStorage.removeItem('adminEmail')
@@ -212,9 +216,13 @@ export default function Dashboard({ adminEmail, onLogout }) {
     }
 
     let baseToUse = typeof baseUrl === 'string' && baseUrl.trim() ? baseUrl.trim() : apiBaseUrl
+    
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const isUsingProductionUrl = envApiBaseUrl !== ''
+    
     try {
       let response = await fetchRekap(baseToUse)
-      if (!response.ok) {
+      if (!response.ok && !isUsingProductionUrl) {
         const altBases = baseToUse.includes(':8100')
           ? [buildApiBaseUrl(8103), buildApiBaseUrl(8110)]
           : baseToUse.includes(':8103')
