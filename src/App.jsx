@@ -384,7 +384,7 @@ function App() {
           headers: { 'X-Session-Token': token },
         })
 
-        if (!response.ok && !isUsingProductionUrl) {
+        if (!response.ok) {
           setAdminAuthed(false)
           setAdminEmail('')
           try {
@@ -392,11 +392,6 @@ function App() {
             window.sessionStorage.removeItem('adminEmail')
             window.sessionStorage.removeItem('adminName')
             window.sessionStorage.removeItem('adminToken')
-          } catch {
-            // ignore
-          }
-          try {
-            window.location.reload()
           } catch {
             // ignore
           }

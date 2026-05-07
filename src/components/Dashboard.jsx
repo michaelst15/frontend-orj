@@ -60,19 +60,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
     const headers = { ...options.headers, ...getAuthHeaders() }
     const response = await fetch(url, { ...options, headers })
     
-    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const isUsingProductionUrl = envApiBaseUrl !== ''
-    
-    if (response.status === 401 && !isUsingProductionUrl) {
-      try {
-        window.sessionStorage.removeItem('adminAuthed')
-        window.sessionStorage.removeItem('adminEmail')
-        window.sessionStorage.removeItem('adminName')
-        window.sessionStorage.removeItem('adminToken')
-        window.location.reload()
-      } catch {
-        // ignore
-      }
+    if (response.status === 401) {
+      onLogout()
       throw new Error('sesi tidak valid')
     }
     return response
