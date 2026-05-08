@@ -370,6 +370,7 @@ function App() {
   const [loginError, setLoginError] = useState('')
   const [loginShowForce, setLoginShowForce] = useState(false)
   const loginFirstFieldRef = useRef(null)
+  const loginFormRef = useRef(null)
 
   useEffect(() => {
     if (!adminAuthed) return
@@ -804,7 +805,7 @@ function App() {
               </button>
             </div>
 
-            <form className="px-6 pt-6 pb-6" onSubmit={handleLoginSubmit}>
+            <form ref={loginFormRef} className="px-6 pt-6 pb-6" onSubmit={handleLoginSubmit}>
               <div className="space-y-4">
                 {loginError ? (
                   <div className="rounded-xl border border-[#c0392b]/30 bg-[#c0392b]/10 px-4 py-3 text-sm text-white">
@@ -864,7 +865,7 @@ function App() {
                     type="button"
                     onClick={() => {
                       setLoginForce(true)
-                      handleLoginSubmit({ preventDefault: () => {} })
+                      loginFormRef.current?.submit()
                     }}
                     className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#f1c40f] bg-transparent px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#f1c40f] transition hover:bg-[#f1c40f] hover:text-[#111111]"
                   >
