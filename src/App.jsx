@@ -600,6 +600,14 @@ function App() {
     const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
     const apiBaseUrl = defaultApiBaseUrl
 
+    console.log('Submitting form:', {
+      nama_lengkap: formNama, 
+      email: formEmail, 
+      telepon: formTelepon,
+      domisili: formDomisili, 
+      pesan: formPesan 
+    })
+
     setFormSubmitting(true)
     setFormSuccess(false)
 
