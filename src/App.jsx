@@ -446,7 +446,7 @@ function App() {
 
   const handleLogout = async () => {
     const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-9zssmdtk50j0hsusbc.leapcell-async.dev'
+    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-n1rpe68q.leapcell.dev'
     const apiBaseUrl = defaultApiBaseUrl
 
     setAdminAuthed(false)
@@ -597,7 +597,7 @@ function App() {
     event.preventDefault()
     
     const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-9zssmdtk50j0hsusbc.leapcell-async.dev'
+    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-n1rpe68q.leapcell.dev'
     const apiBaseUrl = defaultApiBaseUrl
 
     console.log('Submitting form:', {
@@ -660,7 +660,7 @@ function App() {
     }
 
     const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-9zssmdtk50j0hsusbc.leapcell-async.dev'
+    const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-n1rpe68q.leapcell.dev'
     const apiBaseUrl = defaultApiBaseUrl
 
     try {
