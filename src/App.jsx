@@ -707,7 +707,7 @@ function App() {
   }
 
   return (
-    <>
+    <div key={homeResetKey}>
       <div
         id="loader"
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#111111] transition-opacity duration-700"
@@ -1348,7 +1348,7 @@ function App() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   )
 }
 
