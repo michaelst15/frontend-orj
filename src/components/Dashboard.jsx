@@ -1272,62 +1272,119 @@ export default function Dashboard({ adminEmail, onLogout }) {
               </button>
               {notificationsOpen ? (
                 <>
+                  {/* Mobile overlay */}
                   <div 
                     className="fixed inset-0 z-[1499] sm:hidden"
                     onClick={() => setNotificationsOpen(false)}
                   />
-                  <div className="fixed right-5 left-5 top-20 z-[1500] max-w-full rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96">
-                  <div className="border-b border-black/10 px-4 py-3">
-                    <div className="font-bold text-black/90">Notifikasi</div>
-                    <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                  
+                  {/* Mobile notifications */}
+                  <div className="fixed right-5 left-5 top-20 z-[1500] max-w-full rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:hidden">
+                    <div className="border-b border-black/10 px-4 py-3">
+                      <div className="font-bold text-black/90">Notifikasi</div>
+                      <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {dataBaru.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-sm text-black/60">
+                          Belum ada pesan
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-black/10">
+                          {dataBaru.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedNotification(item)
+                                if (!item.is_read) {
+                                  fetchWithAuth(`${apiBaseUrl}/api/data-baru/${item.id}/read`, {
+                                    method: 'PUT'
+                                  }).then(() => {
+                                    setDataBaru(prev => prev.map(i => i.id === item.id ? { ...i, is_read: true } : i))
+                                  })
+                                }
+                              }}
+                              className={`w-full px-4 py-3 text-left transition ${!item.is_read ? 'bg-[#f1c40f]/10' : 'bg-transparent'}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="font-semibold text-black/90">{item.nama_lengkap}</div>
+                                {!item.is_read ? (
+                                  <span className="h-2 w-2 rounded-full bg-[#c0392b]" />
+                                ) : null}
+                              </div>
+                              <div className="mt-1 text-xs text-black/60">
+                                {new Date(item.created_at).toLocaleString('id-ID')}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-black/10 px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
+                        className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
+                      >
+                        Refresh
+                      </button>
+                    </div>
                   </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {dataBaru.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-sm text-black/60">
-                        Belum ada pesan
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-black/10">
-                        {dataBaru.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedNotification(item)
-                              if (!item.is_read) {
-                                fetchWithAuth(`${apiBaseUrl}/api/data-baru/${item.id}/read`, {
-                                  method: 'PUT'
-                                }).then(() => {
-                                  setDataBaru(prev => prev.map(i => i.id === item.id ? { ...i, is_read: true } : i))
-                                })
-                              }
-                            }}
-                            className={`w-full px-4 py-3 text-left transition ${!item.is_read ? 'bg-[#f1c40f]/10' : 'bg-transparent'}`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="font-semibold text-black/90">{item.nama_lengkap}</div>
-                              {!item.is_read ? (
-                                <span className="h-2 w-2 rounded-full bg-[#c0392b]" />
-                              ) : null}
-                            </div>
-                            <div className="mt-1 text-xs text-black/60">
-                              {new Date(item.created_at).toLocaleString('id-ID')}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  
+                  {/* Desktop notifications */}
+                  <div className="hidden absolute right-0 top-12 z-[1500] w-96 rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:block">
+                    <div className="border-b border-black/10 px-4 py-3">
+                      <div className="font-bold text-black/90">Notifikasi</div>
+                      <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {dataBaru.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-sm text-black/60">
+                          Belum ada pesan
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-black/10">
+                          {dataBaru.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedNotification(item)
+                                if (!item.is_read) {
+                                  fetchWithAuth(`${apiBaseUrl}/api/data-baru/${item.id}/read`, {
+                                    method: 'PUT'
+                                  }).then(() => {
+                                    setDataBaru(prev => prev.map(i => i.id === item.id ? { ...i, is_read: true } : i))
+                                  })
+                                }
+                              }}
+                              className={`w-full px-4 py-3 text-left transition ${!item.is_read ? 'bg-[#f1c40f]/10' : 'bg-transparent'}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="font-semibold text-black/90">{item.nama_lengkap}</div>
+                                {!item.is_read ? (
+                                  <span className="h-2 w-2 rounded-full bg-[#c0392b]" />
+                                ) : null}
+                              </div>
+                              <div className="mt-1 text-xs text-black/60">
+                                {new Date(item.created_at).toLocaleString('id-ID')}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-black/10 px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
+                        className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
+                      >
+                        Refresh
+                      </button>
+                    </div>
                   </div>
-                  <div className="border-t border-black/10 px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
-                      className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
-                    >
-                      Refresh
-                    </button>
-                  </div>
-                </div>
                 </>
               ) : null}
             </div>
