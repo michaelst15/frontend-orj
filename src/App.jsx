@@ -463,54 +463,7 @@ function App() {
     }
   }
 
-  const [authCheckDone, setAuthCheckDone] = useState(false)
-  
-  useEffect(() => {
-    if (!adminAuthed) {
-      setAuthCheckDone(false)
-    }
-  }, [adminAuthed])
-  
-  useEffect(() => {
-    if (!adminAuthed || justLoggedIn || authCheckDone) return
 
-    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
-    const apiBaseUrl = defaultApiBaseUrl
-
-    const checkToken = async () => {
-      try {
-        const token = window.localStorage.getItem('adminToken') || ''
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 15000)
-        
-        const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
-          headers: { 'X-Session-Token': token },
-          signal: controller.signal,
-        })
-        clearTimeout(timeoutId)
-
-        if (response.status === 401 || response.status === 403) {
-          setAdminAuthed(false)
-          setAdminEmail('')
-          try {
-            window.localStorage.removeItem('adminAuthed')
-            window.localStorage.removeItem('adminEmail')
-            window.localStorage.removeItem('adminName')
-            window.localStorage.removeItem('adminToken')
-          } catch {
-            // ignore
-          }
-        }
-        setAuthCheckDone(true)
-      } catch {
-        // ignore timeout or network error, don't auto-logout
-        setAuthCheckDone(true)
-      }
-    }
-
-    checkToken()
-  }, [adminAuthed, justLoggedIn, authCheckDone])
 
   useEffect(() => {
     const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
