@@ -476,6 +476,9 @@ function App() {
     
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
     setHomeResetKey(prev => prev + 1)
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
   }
 
 
