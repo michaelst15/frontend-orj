@@ -608,7 +608,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
       }
     }
 
-    if (!dataBaruLoaded || localRefreshKey !== 0) {
+    if (!dataBaruLoaded || localRefreshKey !== 0 || refreshDataBaruKey > 0) {
       load()
     }
 
