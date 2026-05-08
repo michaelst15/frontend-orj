@@ -356,6 +356,8 @@ function App() {
   const [formEmail, setFormEmail] = useState('')
   const [formDomisili, setFormDomisili] = useState('')
   const [formPesan, setFormPesan] = useState('')
+  const [formSubmitting, setFormSubmitting] = useState(false)
+  const [formSuccess, setFormSuccess] = useState(false)
   const [homeResetKey, setHomeResetKey] = useState(0)
   const [adminAuthed, setAdminAuthed] = useState(() => {
     try {
@@ -594,6 +596,9 @@ function App() {
     const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
     const apiBaseUrl = defaultApiBaseUrl
 
+    setFormSubmitting(true)
+    setFormSuccess(false)
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/data-baru`, {
         method: 'POST',
@@ -609,16 +614,23 @@ function App() {
       const data = await response.json()
       if (!response.ok || !data?.ok) {
         alert(data?.message || 'Gagal mengirim data, silakan coba lagi.')
+        setFormSubmitting(false)
         return
       }
 
-      alert('Terima kasih! Data Anda akan kami verifikasi.')
+      setFormSuccess(true)
       setFormNama('')
       setFormEmail('')
       setFormDomisili('')
       setFormPesan('')
+      
+      setTimeout(() => {
+        setFormSuccess(false)
+        setFormSubmitting(false)
+      }, 3000)
     } catch {
       alert('Terjadi kesalahan saat mengirim data, silakan coba lagi.')
+      setFormSubmitting(false)
     }
   }
 
@@ -1243,15 +1255,43 @@ function App() {
               <div className="text-center">
                 <button
                   type="submit"
-                  className="inline-block w-full rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b]"
+                  disabled={formSubmitting}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#c0392b] bg-[#c0392b] px-9 py-3.5 text-sm font-semibold uppercase tracking-[1px] text-white transition hover:bg-white hover:text-[#c0392b] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Kirim Data
+                  {formSubmitting ? (
+                    <>
+                      <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    'Kirim Data'
+                  )}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </section>
+
+      {formSuccess ? (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 px-5 py-10 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 text-center animate-[zoomIn_0.4s_ease-out]">
+            <style>{`
+              @keyframes zoomIn {
+                from { transform: scale(0.8); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+              }
+            `}</style>
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+              <svg viewBox="0 0 24 24" className="h-12 w-12 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <div className="text-3xl font-serif font-bold text-white">Berhasil!</div>
+            <div className="text-white/80">Terima kasih! Data Anda akan kami verifikasi.</div>
+          </div>
+        </div>
+      ) : null}
 
       <footer id="kontak" className="border-t border-white/5 bg-[#050505] pb-8 pt-20 text-[#888]">
         <div className="mx-auto max-w-[1200px] px-5">
