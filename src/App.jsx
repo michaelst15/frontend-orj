@@ -356,6 +356,7 @@ function App() {
   const [formEmail, setFormEmail] = useState('')
   const [formDomisili, setFormDomisili] = useState('')
   const [formPesan, setFormPesan] = useState('')
+  const [homeResetKey, setHomeResetKey] = useState(0)
   const [adminAuthed, setAdminAuthed] = useState(() => {
     try {
       return window.localStorage.getItem('adminAuthed') === '1'
@@ -363,6 +364,15 @@ function App() {
       return false
     }
   })
+  
+  useEffect(() => {
+    if (!adminAuthed) {
+      setFormNama('')
+      setFormEmail('')
+      setFormDomisili('')
+      setFormPesan('')
+    }
+  }, [adminAuthed])
   const [adminEmail, setAdminEmail] = useState(() => {
     try {
       return window.localStorage.getItem('adminEmail') || ''
@@ -461,6 +471,9 @@ function App() {
         // ignore
       }
     }
+    
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+    setHomeResetKey(prev => prev + 1)
   }
 
 
