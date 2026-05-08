@@ -138,6 +138,11 @@ export default function Dashboard({ adminEmail, onLogout }) {
     absensiKehadiran: 0,
     presentasi: 0
   })
+  const [dataBaru, setDataBaru] = useState([])
+  const [dataBaruLoaded, setDataBaruLoaded] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [selectedNotification, setSelectedNotification] = useState(null)
+  const [refreshDataBaruKey, setRefreshDataBaruKey] = useState(0)
 
   const handleExportPdf = async () => {
     setExportPdfLoading(true)
@@ -582,6 +587,32 @@ export default function Dashboard({ adminEmail, onLogout }) {
       cancelled = true
     }
   }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshPresentasiKey, dataLoaded.presentasi])
+
+  useEffect(() => {
+    let cancelled = false
+    let localRefreshKey = refreshDataBaruKey
+
+    const load = async () => {
+      try {
+        const response = await fetchWithAuth(`${apiBaseUrl}/api/data-baru`)
+        const data = await response.json()
+        if (!cancelled && response.ok && Array.isArray(data?.data)) {
+          setDataBaru(data.data)
+          setDataBaruLoaded(true)
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!dataBaruLoaded || localRefreshKey !== 0) {
+      load()
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [apiBaseUrl, refreshDataBaruKey, dataBaruLoaded])
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -1220,6 +1251,77 @@ export default function Dashboard({ adminEmail, onLogout }) {
               <span className="text-black/40">•</span>
               <span className="tabular-nums text-black/70">{formatTime(new Date(now))}</span>
             </div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-black/80 transition hover:bg-black/[0.06]"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                {dataBaru.filter(d => !d.is_read).length > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#c0392b] text-xs font-bold text-white">
+                    {dataBaru.filter(d => !d.is_read).length}
+                  </span>
+                ) : null}
+              </button>
+              {notificationsOpen ? (
+                <div className="absolute right-0 top-12 z-[1500] w-80 rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+                  <div className="border-b border-black/10 px-4 py-3">
+                    <div className="font-bold text-black/90">Notifikasi</div>
+                    <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {dataBaru.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-sm text-black/60">
+                        Belum ada pesan
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-black/10">
+                        {dataBaru.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedNotification(item)
+                              if (!item.is_read) {
+                                fetchWithAuth(`${apiBaseUrl}/api/data-baru/${item.id}/read`, {
+                                  method: 'PUT'
+                                }).then(() => {
+                                  setDataBaru(prev => prev.map(i => i.id === item.id ? { ...i, is_read: true } : i))
+                                })
+                              }
+                            }}
+                            className={`w-full px-4 py-3 text-left transition ${!item.is_read ? 'bg-[#f1c40f]/10' : 'bg-transparent'}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="font-semibold text-black/90">{item.nama_lengkap}</div>
+                              {!item.is_read ? (
+                                <span className="h-2 w-2 rounded-full bg-[#c0392b]" />
+                              ) : null}
+                            </div>
+                            <div className="mt-1 text-xs text-black/60">
+                              {new Date(item.created_at).toLocaleString('id-ID')}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t border-black/10 px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
+                      className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={onLogout}
@@ -1312,6 +1414,73 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   disabled={importSubmitting}
                 >
                   {importSubmitting ? 'Mengirim...' : 'Import'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {selectedNotification ? (
+          <div className="fixed inset-0 z-[1500] flex items-center justify-center bg-black/70 px-5 py-10 backdrop-blur-sm">
+            <div className="w-full max-w-[600px] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)] animate-[zoomIn_0.3s_ease-out]">
+              <style>{`
+                @keyframes zoomIn {
+                  from { transform: scale(0.9); opacity: 0; }
+                  to { transform: scale(1); opacity: 1; }
+                }
+              `}</style>
+              <div className="flex items-center justify-between gap-4 border-b border-black/10 px-6 py-4">
+                <div>
+                  <div className="font-['Space_Grotesk'] text-lg font-bold tracking-tight">
+                    Pesan Baru dari {selectedNotification.nama_lengkap}
+                  </div>
+                  <div className="mt-1 text-xs text-black/60">
+                    {new Date(selectedNotification.created_at).toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotification(null)}
+                  className="rounded-full border border-black/10 bg-black/[0.03] px-3 py-1.5 text-sm text-black/80 transition hover:bg-black/[0.06]"
+                >
+                  Tutup
+                </button>
+              </div>
+
+              <div className="space-y-4 px-6 py-6">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Nama Lengkap</div>
+                  <div className="mt-1 text-lg font-semibold text-black/90">{selectedNotification.nama_lengkap}</div>
+                </div>
+                {selectedNotification.email ? (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Email</div>
+                    <div className="mt-1 text-sm text-black/80">{selectedNotification.email}</div>
+                  </div>
+                ) : null}
+                {selectedNotification.domisili ? (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Domisili</div>
+                    <div className="mt-1 text-sm text-black/80">{selectedNotification.domisili}</div>
+                  </div>
+                ) : null}
+                {selectedNotification.pesan ? (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Pesan / Kontribusi</div>
+                    <div className="mt-2 rounded-xl border border-black/10 bg-black/[0.02] p-4 text-sm text-black/80">
+                      {selectedNotification.pesan}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="border-t border-black/10 px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotification(null)}
+                  className="w-full rounded-xl bg-gradient-to-r from-[#c0392b] to-[#f1c40f] px-5 py-3 text-sm font-semibold text-[#111111] transition hover:opacity-95"
+                >
+                  Tutup
                 </button>
               </div>
             </div>

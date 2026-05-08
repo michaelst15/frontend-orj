@@ -352,7 +352,10 @@ function App() {
   const [loginVisible, setLoginVisible] = useState(false)
   const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
-  const [loginForce, setLoginForce] = useState(false)
+  const [formNama, setFormNama] = useState('')
+  const [formEmail, setFormEmail] = useState('')
+  const [formDomisili, setFormDomisili] = useState('')
+  const [formPesan, setFormPesan] = useState('')
   const [adminAuthed, setAdminAuthed] = useState(() => {
     try {
       return window.localStorage.getItem('adminAuthed') === '1'
@@ -368,11 +371,11 @@ function App() {
     }
   })
   const [loginError, setLoginError] = useState('')
-  const [loginShowForce, setLoginShowForce] = useState(false)
   const loginFirstFieldRef = useRef(null)
   const loginFormRef = useRef(null)
   const inactivityTimeoutRef = useRef(null)
   const INACTIVITY_LIMIT = 5 * 60 * 1000
+  const [justLoggedIn, setJustLoggedIn] = useState(false)
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimeoutRef.current) {
@@ -461,7 +464,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (!adminAuthed) return
+    if (!adminAuthed || justLoggedIn) return
 
     const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
     const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
@@ -471,7 +474,7 @@ function App() {
       try {
         const token = window.localStorage.getItem('adminToken') || ''
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 10000)
+        const timeoutId = setTimeout(() => controller.abort(), 15000)
         
         const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
           headers: { 'X-Session-Token': token },
@@ -497,7 +500,7 @@ function App() {
     }
 
     checkToken()
-  }, [adminAuthed])
+  }, [adminAuthed, justLoggedIn])
 
   useEffect(() => {
     const fullText = 'Persatuan Tobing Ompu Raja Jae Jae'
@@ -577,8 +580,6 @@ function App() {
     closeNav()
     setLoginMounted(true)
     setLoginError('')
-    setLoginForce(false)
-    setLoginShowForce(false)
     requestAnimationFrame(() => setLoginVisible(true))
   }
 
@@ -610,9 +611,39 @@ function App() {
     window.setTimeout(() => loginFirstFieldRef.current?.focus(), 0)
   }, [loginVisible])
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    alert('Terima kasih! Data Anda akan kami verifikasi.')
+    
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+    const apiBaseUrl = defaultApiBaseUrl
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/data-baru`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          nama_lengkap: formNama, 
+          email: formEmail, 
+          domisili: formDomisili, 
+          pesan: formPesan 
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok || !data?.ok) {
+        alert(data?.message || 'Gagal mengirim data, silakan coba lagi.')
+        return
+      }
+
+      alert('Terima kasih! Data Anda akan kami verifikasi.')
+      setFormNama('')
+      setFormEmail('')
+      setFormDomisili('')
+      setFormPesan('')
+    } catch {
+      alert('Terjadi kesalahan saat mengirim data, silakan coba lagi.')
+    }
   }
 
   const handleLoginSubmit = async (event) => {
@@ -634,7 +665,7 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, force: loginForce }),
+        body: JSON.stringify({ email, password }),
       })
 
       const raw = await response.text()
@@ -647,28 +678,19 @@ function App() {
         }
       }
 
-      if (response.status === 409 && data?.requireForce) {
-        setLoginError(data?.message || 'Akun sedang digunakan')
-        setLoginShowForce(true)
-        return
-      }
-
       if (!response.ok || !data?.ok) {
         setLoginError(data?.message || 'Email atau password salah.')
-        setLoginShowForce(false)
-        setLoginForce(false)
         return
       }
 
       if (!data?.token || !data?.email || !data?.name) {
         setLoginError('Gagal masuk. Silakan coba lagi.')
-        setLoginShowForce(false)
-        setLoginForce(false)
         return
       }
 
       setAdminAuthed(true)
       setAdminEmail(data.email)
+      setJustLoggedIn(true)
       try {
         window.localStorage.setItem('adminAuthed', '1')
         window.localStorage.setItem('adminEmail', data.email)
@@ -680,14 +702,15 @@ function App() {
       setLoginIdentifier('')
       setLoginPassword('')
       setLoginError('')
-      setLoginShowForce(false)
-      setLoginForce(false)
       closeLogin()
+      
+      setTimeout(() => {
+        setJustLoggedIn(false)
+      }, 5000)
+      
       return
     } catch (err) {
       setLoginError('Terjadi kesalahan. Pastikan backend aktif di ' + apiBaseUrl)
-      setLoginShowForce(false)
-      setLoginForce(false)
     }
   }
 
@@ -914,19 +937,6 @@ function App() {
                 >
                   Masuk
                 </button>
-
-                {loginShowForce ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginForce(true)
-                      loginFormRef.current?.submit()
-                    }}
-                    className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#f1c40f] bg-transparent px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#f1c40f] transition hover:bg-[#f1c40f] hover:text-[#111111]"
-                  >
-                    Paksa Masuk
-                  </button>
-                ) : null}
 
                 <div className="text-center text-xs text-white/60">
                   Dengan masuk, Anda menyetujui kebijakan dan aturan yang berlaku.
@@ -1207,6 +1217,8 @@ function App() {
                 <input
                   type="text"
                   id="nama"
+                  value={formNama}
+                  onChange={(e) => setFormNama(e.target.value)}
                   placeholder="Contoh: Jhon Lumban Tobing"
                   required
                   className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
@@ -1219,6 +1231,8 @@ function App() {
                 <input
                   type="email"
                   id="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
                   placeholder="email@contoh.com"
                   required
                   className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
@@ -1231,6 +1245,8 @@ function App() {
                 <input
                   type="text"
                   id="asal"
+                  value={formDomisili}
+                  onChange={(e) => setFormDomisili(e.target.value)}
                   placeholder="Kota Anda saat ini"
                   className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
                 />
@@ -1242,6 +1258,8 @@ function App() {
                 <textarea
                   id="pesan"
                   rows={4}
+                  value={formPesan}
+                  onChange={(e) => setFormPesan(e.target.value)}
                   placeholder="Ceritakan minat Anda bergabung..."
                   className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
                 />
