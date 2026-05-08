@@ -130,6 +130,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const [dataLoaded, setDataLoaded] = useState({
     data: false,
     absensi: false,
+    absensiKehadiran: false,
     presentasi: false
   })
   const [lastRefreshKey, setLastRefreshKey] = useState({
@@ -378,18 +379,17 @@ export default function Dashboard({ adminEmail, onLogout }) {
       }
     }
 
-    if (!dataLoaded.absensi || refreshAbsensiFamiliesKey !== lastRefreshKey.absensiFamilies || refreshAbsensiKehadiranKey !== lastRefreshKey.absensiKehadiran) {
+    if (!dataLoaded.absensi || refreshAbsensiFamiliesKey !== lastRefreshKey.absensiFamilies) {
       setLastRefreshKey(prev => ({ 
         ...prev, 
-        absensiFamilies: refreshAbsensiFamiliesKey,
-        absensiKehadiran: refreshAbsensiKehadiranKey 
+        absensiFamilies: refreshAbsensiFamiliesKey
       }))
       load()
     }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiFamiliesKey, refreshAbsensiKehadiranKey, dataLoaded.absensi])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiFamiliesKey, dataLoaded.absensi])
 
   useEffect(() => {
     if (activeMenu !== 'absensi') return
@@ -498,18 +498,21 @@ export default function Dashboard({ adminEmail, onLogout }) {
         if (!cancelled) setAbsensiKehadiranRows([])
         refreshAbsensiRekapHadir()
       } finally {
-        if (!cancelled) setAbsensiKehadiranLoading(false)
+        if (!cancelled) {
+          setAbsensiKehadiranLoading(false)
+          setDataLoaded(prev => ({ ...prev, absensiKehadiran: true }))
+        }
       }
     }
 
-    if (!dataLoaded.absensi || refreshAbsensiKehadiranKey !== lastRefreshKey.absensiKehadiran) {
+    if (!dataLoaded.absensiKehadiran || refreshAbsensiKehadiranKey !== lastRefreshKey.absensiKehadiran) {
       setLastRefreshKey(prev => ({ ...prev, absensiKehadiran: refreshAbsensiKehadiranKey }))
       load()
     }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiKehadiranKey, dataLoaded.absensi])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiKehadiranKey, dataLoaded.absensiKehadiran])
 
   useEffect(() => {
     if (activeMenu !== 'presentasi') return
