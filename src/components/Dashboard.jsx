@@ -593,7 +593,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
 
   useEffect(() => {
     let cancelled = false
-    let localRefreshKey = refreshDataBaruKey
 
     const load = async () => {
       try {
@@ -608,14 +607,12 @@ export default function Dashboard({ adminEmail, onLogout }) {
       }
     }
 
-    if (!dataBaruLoaded || localRefreshKey !== 0 || refreshDataBaruKey > 0) {
-      load()
-    }
+    load()
 
     return () => {
       cancelled = true
     }
-  }, [apiBaseUrl, refreshDataBaruKey, dataBaruLoaded])
+  }, [apiBaseUrl, refreshDataBaruKey])
 
   useEffect(() => {
     const id = window.setInterval(() => {
