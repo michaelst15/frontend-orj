@@ -217,7 +217,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
   }
 
   const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-  const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+  const defaultApiBaseUrl = envApiBaseUrl || 'https://backend-orj-michaelst152166-9zssmdtk50j0hsusbc.leapcell-async.dev'
   const [apiBaseOverride, setApiBaseOverride] = useState('')
   const apiBaseUrl = apiBaseOverride || defaultApiBaseUrl
 
