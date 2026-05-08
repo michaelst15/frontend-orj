@@ -1280,9 +1280,20 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   
                   {/* Mobile notifications */}
                   <div className="fixed right-5 left-5 top-20 z-[1500] max-w-full rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:hidden">
-                    <div className="border-b border-black/10 px-4 py-3">
-                      <div className="font-bold text-black/90">Notifikasi</div>
-                      <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                    <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
+                      <div>
+                        <div className="font-bold text-black/90">Notifikasi</div>
+                        <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-black/80 transition hover:bg-black/[0.06]"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {dataBaru.length === 0 ? (
@@ -1320,23 +1331,25 @@ export default function Dashboard({ adminEmail, onLogout }) {
                           ))}
                         </div>
                       )}
-                    </div>
-                    <div className="border-t border-black/10 px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
-                        className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
-                      >
-                        Refresh
-                      </button>
                     </div>
                   </div>
                   
                   {/* Desktop notifications */}
                   <div className="hidden absolute right-0 top-12 z-[1500] w-96 rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:block">
-                    <div className="border-b border-black/10 px-4 py-3">
-                      <div className="font-bold text-black/90">Notifikasi</div>
-                      <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                    <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
+                      <div>
+                        <div className="font-bold text-black/90">Notifikasi</div>
+                        <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-black/80 transition hover:bg-black/[0.06]"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {dataBaru.length === 0 ? (
@@ -1374,15 +1387,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
                           ))}
                         </div>
                       )}
-                    </div>
-                    <div className="border-t border-black/10 px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setRefreshDataBaruKey(prev => prev + 1)}
-                        className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold text-black/80 transition hover:bg-black/[0.06]"
-                      >
-                        Refresh
-                      </button>
                     </div>
                   </div>
                 </>
@@ -1522,6 +1526,12 @@ export default function Dashboard({ adminEmail, onLogout }) {
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Email</div>
                     <div className="mt-1 text-sm text-black/80">{selectedNotification.email}</div>
+                  </div>
+                ) : null}
+                {selectedNotification.telepon ? (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[1px] text-black/60">Nomor Telepon</div>
+                    <div className="mt-1 text-sm text-black/80">{selectedNotification.telepon}</div>
                   </div>
                 ) : null}
                 {selectedNotification.domisili ? (

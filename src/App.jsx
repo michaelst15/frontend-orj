@@ -354,6 +354,7 @@ function App() {
   const [loginPassword, setLoginPassword] = useState('')
   const [formNama, setFormNama] = useState('')
   const [formEmail, setFormEmail] = useState('')
+  const [formTelepon, setFormTelepon] = useState('')
   const [formDomisili, setFormDomisili] = useState('')
   const [formPesan, setFormPesan] = useState('')
   const [formSubmitting, setFormSubmitting] = useState(false)
@@ -609,6 +610,7 @@ function App() {
         body: JSON.stringify({ 
           nama_lengkap: formNama, 
           email: formEmail, 
+          telepon: formTelepon,
           domisili: formDomisili, 
           pesan: formPesan 
         }),
@@ -624,6 +626,7 @@ function App() {
       setFormSuccess(true)
       setFormNama('')
       setFormEmail('')
+      setFormTelepon('')
       setFormDomisili('')
       setFormPesan('')
       
@@ -982,7 +985,7 @@ function App() {
                 relevan.
               </p>
               <div className="my-6 border-l-[3px] border-[#f1c40f] pl-5 font-serif text-xl italic text-[#f1c40f]">
-                &quot;Sipoppul pe mangan gabe, sahat hamatean, gabe mamea.&quot;
+                &quot;Tak ada perbedaan, hanya ada sebuah persatuan dan persaudaraan yang menguatkan&quot;
               </div>
               <p className="mb-6 font-light text-[#bbb]">
                 Kami tidak hanya menyambung tali silsilah, tetapi membangun jaringan kolaborasi antar
@@ -1225,7 +1228,19 @@ function App() {
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   placeholder="email@contoh.com"
-                  required
+                  className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="telepon" className="mb-2 block text-sm font-semibold text-[#f1c40f]">
+                  Nomor Telepon
+                </label>
+                <input
+                  type="tel"
+                  id="telepon"
+                  value={formTelepon}
+                  onChange={(e) => setFormTelepon(e.target.value)}
+                  placeholder="081234567890"
                   className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/60 transition focus:border-[#c0392b] focus:bg-white/10 focus:outline-none"
                 />
               </div>
