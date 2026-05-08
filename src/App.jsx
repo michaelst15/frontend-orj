@@ -352,6 +352,7 @@ function App() {
   const [loginVisible, setLoginVisible] = useState(false)
   const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [loginForce, setLoginForce] = useState(false)
   const [adminAuthed, setAdminAuthed] = useState(() => {
     try {
       return window.localStorage.getItem('adminAuthed') === '1'
@@ -367,6 +368,7 @@ function App() {
     }
   })
   const [loginError, setLoginError] = useState('')
+  const [loginShowForce, setLoginShowForce] = useState(false)
   const loginFirstFieldRef = useRef(null)
 
   useEffect(() => {
@@ -486,6 +488,8 @@ function App() {
     closeNav()
     setLoginMounted(true)
     setLoginError('')
+    setLoginForce(false)
+    setLoginShowForce(false)
     requestAnimationFrame(() => setLoginVisible(true))
   }
 
@@ -541,7 +545,7 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, force: loginForce }),
       })
 
       const raw = await response.text()
@@ -556,16 +560,21 @@ function App() {
 
       if (response.status === 409 && data?.requireForce) {
         setLoginError(data?.message || 'Akun sedang digunakan')
+        setLoginShowForce(true)
         return
       }
 
       if (!response.ok || !data?.ok) {
         setLoginError(data?.message || 'Email atau password salah.')
+        setLoginShowForce(false)
+        setLoginForce(false)
         return
       }
 
       if (!data?.token || !data?.email || !data?.name) {
         setLoginError('Gagal masuk. Silakan coba lagi.')
+        setLoginShowForce(false)
+        setLoginForce(false)
         return
       }
 
@@ -582,10 +591,14 @@ function App() {
       setLoginIdentifier('')
       setLoginPassword('')
       setLoginError('')
+      setLoginShowForce(false)
+      setLoginForce(false)
       closeLogin()
       return
     } catch (err) {
       setLoginError('Terjadi kesalahan. Pastikan backend aktif di ' + apiBaseUrl)
+      setLoginShowForce(false)
+      setLoginForce(false)
     }
   }
 
@@ -845,6 +858,19 @@ function App() {
                 >
                   Masuk
                 </button>
+
+                {loginShowForce ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginForce(true)
+                      handleLoginSubmit({ preventDefault: () => {} })
+                    }}
+                    className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#f1c40f] bg-transparent px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#f1c40f] transition hover:bg-[#f1c40f] hover:text-[#111111]"
+                  >
+                    Paksa Masuk
+                  </button>
+                ) : null}
 
                 <div className="text-center text-xs text-white/60">
                   Dengan masuk, Anda menyetujui kebijakan dan aturan yang berlaku.
