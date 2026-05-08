@@ -1276,7 +1276,7 @@ export default function Dashboard({ adminEmail, onLogout }) {
                     className="fixed inset-0 z-[1499] sm:hidden"
                     onClick={() => setNotificationsOpen(false)}
                   />
-                  <div className="fixed right-5 left-5 top-20 z-[1500] max-w-full rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:absolute sm:left-auto sm:right-0 sm:w-80">
+                  <div className="fixed right-5 left-5 top-20 z-[1500] max-w-full rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.15)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96">
                   <div className="border-b border-black/10 px-4 py-3">
                     <div className="font-bold text-black/90">Notifikasi</div>
                     <div className="text-xs text-black/60">Pesan baru dari pengunjung</div>
