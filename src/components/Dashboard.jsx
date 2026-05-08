@@ -58,8 +58,21 @@ export default function Dashboard({ adminEmail, onLogout }) {
 
   const fetchWithAuth = async (url, options = {}) => {
     const headers = { ...options.headers, ...getAuthHeaders() }
-    const response = await fetch(url, { ...options, headers })
-    return response
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+    
+    try {
+      const response = await fetch(url, { 
+        ...options, 
+        headers,
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      return response
+    } catch (err) {
+      clearTimeout(timeoutId)
+      throw err
+    }
   }
   const [now, setNow] = useState(() => Date.now())
   const [attendance, setAttendance] = useState(() => createInitialAttendance())
