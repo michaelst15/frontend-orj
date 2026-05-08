@@ -597,12 +597,16 @@ function App() {
     const token = window.localStorage.getItem('adminToken') || ''
     if (token) {
       try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000)
         await fetch(`${apiBaseUrl}/api/auth/logout`, {
           method: 'POST',
           headers: { 'X-Session-Token': token },
+          signal: controller.signal,
         })
+        clearTimeout(timeoutId)
       } catch {
-        // ignore, fallback
+        // ignore timeout or network error, still logout locally
       }
     }
 
