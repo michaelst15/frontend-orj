@@ -205,7 +205,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const apiBaseUrl = apiBaseOverride || defaultApiBaseUrl
 
   const refreshAbsensiRekapHadir = useCallback(async (baseUrl) => {
-    const buildApiBaseUrl = (port) => `${window.location.protocol}//${window.location.hostname}:${port}`
     const fetchRekap = async (base) => fetchWithAuth(`${base}/api/kehadiran/rekap`, { cache: 'no-store' })
     const parseRows = (rows) => {
       const out = { otuan: 0, osotargoling: 0, omogot: 0, odatup: 0 }
@@ -220,29 +219,8 @@ export default function Dashboard({ adminEmail, onLogout }) {
 
     let baseToUse = typeof baseUrl === 'string' && baseUrl.trim() ? baseUrl.trim() : apiBaseUrl
     
-    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const isUsingProductionUrl = envApiBaseUrl !== ''
-    
     try {
       let response = await fetchRekap(baseToUse)
-      if (!response.ok && !isUsingProductionUrl) {
-        const altBases = baseToUse.includes(':8100')
-          ? [buildApiBaseUrl(8103), buildApiBaseUrl(8110)]
-          : baseToUse.includes(':8103')
-            ? [buildApiBaseUrl(8100), buildApiBaseUrl(8110)]
-            : [buildApiBaseUrl(8100), buildApiBaseUrl(8103)]
-
-        for (const altBase of altBases) {
-          const altResponse = await fetchRekap(altBase)
-          if (altResponse.ok) {
-            setApiBaseOverride(altBase)
-            baseToUse = altBase
-            response = altResponse
-            break
-          }
-          response = altResponse
-        }
-      }
 
       const raw = await response.text()
       let data = null
@@ -505,23 +483,11 @@ export default function Dashboard({ adminEmail, onLogout }) {
     const load = async () => {
       setPresentasiLoading(true)
       try {
-        const buildApiBaseUrl = (port) => `${window.location.protocol}//${window.location.hostname}:${port}`
         const fetchKehadiranMetrics = async (base) => fetchWithAuth(`${base}/api/kehadiran/metrics`, { cache: 'no-store' })
         const fetchAbsensiKeluarga = async (base) => fetchWithAuth(`${base}/api/absensi/keluarga`, { cache: 'no-store' })
 
         let baseToUse = apiBaseUrl
         let response = await fetchKehadiranMetrics(baseToUse)
-        if (!response.ok && !envApiBaseUrl) {
-          const altBase = baseToUse.includes(':8100') ? buildApiBaseUrl(8103) : buildApiBaseUrl(8100)
-          const altResponse = await fetchKehadiranMetrics(altBase)
-          if (altResponse.ok) {
-            setApiBaseOverride(altBase)
-            baseToUse = altBase
-            response = altResponse
-          } else {
-            response = altResponse
-          }
-        }
 
         const raw = await response.text()
         let data = null
@@ -931,7 +897,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
 
     setAbsensiApplySubmitting(true)
     try {
-      const buildApiBaseUrl = (port) => `${window.location.protocol}//${window.location.hostname}:${port}`
       let baseToUse = apiBaseUrl
       const postAbsensiDetail = async (base) =>
         fetchWithAuth(`${base}/api/absensi/detail`, {
@@ -942,17 +907,6 @@ export default function Dashboard({ adminEmail, onLogout }) {
         })
 
       let detailResponse = await postAbsensiDetail(baseToUse)
-      if (detailResponse.status === 405 && !envApiBaseUrl) {
-        const altBase = baseToUse.includes(':8100') ? buildApiBaseUrl(8103) : buildApiBaseUrl(8100)
-        const altResponse = await postAbsensiDetail(altBase)
-        if (altResponse.ok) {
-          setApiBaseOverride(altBase)
-          baseToUse = altBase
-          detailResponse = altResponse
-        } else {
-          detailResponse = altResponse
-        }
-      }
 
       const detailRaw = await detailResponse.text()
       let detailData = null

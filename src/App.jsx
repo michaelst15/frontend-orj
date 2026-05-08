@@ -383,7 +383,7 @@ function App() {
       try {
         const token = window.localStorage.getItem('adminToken') || ''
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 5000)
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
         
         const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
           headers: { 'X-Session-Token': token },
@@ -391,7 +391,7 @@ function App() {
         })
         clearTimeout(timeoutId)
 
-        if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
           setAdminAuthed(false)
           setAdminEmail('')
           try {
