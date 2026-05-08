@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Dashboard from './components/Dashboard'
 import foto2 from './assets/foto2.jpg'
 import anonim from './assets/anonim.jpg'
@@ -371,6 +371,94 @@ function App() {
   const [loginShowForce, setLoginShowForce] = useState(false)
   const loginFirstFieldRef = useRef(null)
   const loginFormRef = useRef(null)
+  const inactivityTimeoutRef = useRef(null)
+  const INACTIVITY_LIMIT = 5 * 60 * 1000
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimeoutRef.current) {
+      clearTimeout(inactivityTimeoutRef.current)
+    }
+    if (adminAuthed) {
+      inactivityTimeoutRef.current = setTimeout(() => {
+        setAdminAuthed(false)
+        setAdminEmail('')
+        try {
+          window.localStorage.removeItem('adminAuthed')
+          window.localStorage.removeItem('adminEmail')
+          window.localStorage.removeItem('adminName')
+          window.localStorage.removeItem('adminToken')
+        } catch {
+          // ignore
+        }
+      }, INACTIVITY_LIMIT)
+    }
+  }, [adminAuthed])
+
+  const handleLogoutWithCleanup = async () => {
+    if (inactivityTimeoutRef.current) {
+      clearTimeout(inactivityTimeoutRef.current)
+    }
+    await handleLogout()
+  }
+
+  useEffect(() => {
+    if (!adminAuthed) {
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current)
+      }
+      return
+    }
+
+    resetInactivityTimer()
+
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click']
+    const handleActivity = () => resetInactivityTimer()
+
+    events.forEach(event => {
+      window.addEventListener(event, handleActivity, true)
+    })
+
+    return () => {
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current)
+      }
+      events.forEach(event => {
+        window.removeEventListener(event, handleActivity, true)
+      })
+    }
+  }, [adminAuthed, resetInactivityTimer])
+
+  const handleLogout = async () => {
+    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
+    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
+    const apiBaseUrl = defaultApiBaseUrl
+
+    setAdminAuthed(false)
+    setAdminEmail('')
+    try {
+      window.localStorage.removeItem('adminAuthed')
+      window.localStorage.removeItem('adminEmail')
+      window.localStorage.removeItem('adminName')
+      window.localStorage.removeItem('adminToken')
+    } catch {
+      // ignore
+    }
+
+    const token = window.localStorage.getItem('adminToken') || ''
+    if (token) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        fetch(`${apiBaseUrl}/api/auth/logout`, {
+          method: 'POST',
+          headers: { 'X-Session-Token': token },
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeoutId))
+      } catch {
+        // ignore
+      }
+    }
+  }
 
   useEffect(() => {
     if (!adminAuthed) return
@@ -603,41 +691,8 @@ function App() {
     }
   }
 
-  const handleLogout = async () => {
-    const envApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' ? import.meta.env.VITE_API_BASE_URL.trim() : ''
-    const defaultApiBaseUrl = envApiBaseUrl || `${window.location.protocol}//${window.location.hostname}:8100`
-    const apiBaseUrl = defaultApiBaseUrl
-
-    const token = window.localStorage.getItem('adminToken') || ''
-    if (token) {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000)
-        await fetch(`${apiBaseUrl}/api/auth/logout`, {
-          method: 'POST',
-          headers: { 'X-Session-Token': token },
-          signal: controller.signal,
-        })
-        clearTimeout(timeoutId)
-      } catch {
-        // ignore timeout or network error, still logout locally
-      }
-    }
-
-    setAdminAuthed(false)
-    setAdminEmail('')
-    try {
-      window.localStorage.removeItem('adminAuthed')
-      window.localStorage.removeItem('adminEmail')
-      window.localStorage.removeItem('adminName')
-      window.localStorage.removeItem('adminToken')
-    } catch {
-      // ignore
-    }
-  }
-
   if (adminAuthed) {
-    return <Dashboard adminEmail={adminEmail} onLogout={handleLogout} />
+    return <Dashboard adminEmail={adminEmail} onLogout={handleLogoutWithCleanup} />
   }
 
   return (

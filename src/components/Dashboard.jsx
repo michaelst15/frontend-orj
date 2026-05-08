@@ -127,6 +127,17 @@ export default function Dashboard({ adminEmail, onLogout }) {
   const [refreshPresentasiKey, setRefreshPresentasiKey] = useState(0)
   const [refreshAbsensiFamiliesKey, setRefreshAbsensiFamiliesKey] = useState(0)
   const [refreshAbsensiKehadiranKey, setRefreshAbsensiKehadiranKey] = useState(0)
+  const [dataLoaded, setDataLoaded] = useState({
+    data: false,
+    absensi: false,
+    presentasi: false
+  })
+  const [lastRefreshKey, setLastRefreshKey] = useState({
+    data: 0,
+    absensiFamilies: 0,
+    absensiKehadiran: 0,
+    presentasi: 0
+  })
 
   const handleExportPdf = async () => {
     setExportPdfLoading(true)
@@ -280,15 +291,21 @@ export default function Dashboard({ adminEmail, onLogout }) {
       } catch {
         if (!cancelled) setMetricsError('')
       } finally {
-        if (!cancelled) setDataLoading(false)
+        if (!cancelled) {
+          setDataLoading(false)
+          setDataLoaded(prev => ({ ...prev, data: true }))
+        }
       }
     }
 
-    load()
+    if (!dataLoaded.data || refreshDataKey !== lastRefreshKey.data) {
+      setLastRefreshKey(prev => ({ ...prev, data: refreshDataKey }))
+      load()
+    }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshDataKey])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshDataKey, dataLoaded.data])
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000)
@@ -349,15 +366,25 @@ export default function Dashboard({ adminEmail, onLogout }) {
           }
         }
       } finally {
-        if (!cancelled) setAbsensiFamiliesLoading(false)
+        if (!cancelled) {
+          setAbsensiFamiliesLoading(false)
+          setDataLoaded(prev => ({ ...prev, absensi: true }))
+        }
       }
     }
 
-    load()
+    if (!dataLoaded.absensi || refreshAbsensiFamiliesKey !== lastRefreshKey.absensiFamilies || refreshAbsensiKehadiranKey !== lastRefreshKey.absensiKehadiran) {
+      setLastRefreshKey(prev => ({ 
+        ...prev, 
+        absensiFamilies: refreshAbsensiFamiliesKey,
+        absensiKehadiran: refreshAbsensiKehadiranKey 
+      }))
+      load()
+    }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiFamiliesKey])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiFamiliesKey, refreshAbsensiKehadiranKey, dataLoaded.absensi])
 
   useEffect(() => {
     if (activeMenu !== 'absensi') return
@@ -470,11 +497,14 @@ export default function Dashboard({ adminEmail, onLogout }) {
       }
     }
 
-    load()
+    if (!dataLoaded.absensi || refreshAbsensiKehadiranKey !== lastRefreshKey.absensiKehadiran) {
+      setLastRefreshKey(prev => ({ ...prev, absensiKehadiran: refreshAbsensiKehadiranKey }))
+      load()
+    }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiKehadiranKey])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshAbsensiKehadiranKey, dataLoaded.absensi])
 
   useEffect(() => {
     if (activeMenu !== 'presentasi') return
@@ -537,15 +567,21 @@ export default function Dashboard({ adminEmail, onLogout }) {
           setPresentasiKehadiran(null)
         }
       } finally {
-        if (!cancelled) setPresentasiLoading(false)
+        if (!cancelled) {
+          setPresentasiLoading(false)
+          setDataLoaded(prev => ({ ...prev, presentasi: true }))
+        }
       }
     }
 
-    load()
+    if (!dataLoaded.presentasi || refreshPresentasiKey !== lastRefreshKey.presentasi) {
+      setLastRefreshKey(prev => ({ ...prev, presentasi: refreshPresentasiKey }))
+      load()
+    }
     return () => {
       cancelled = true
     }
-  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshPresentasiKey])
+  }, [activeMenu, apiBaseUrl, envApiBaseUrl, refreshPresentasiKey, dataLoaded.presentasi])
 
   useEffect(() => {
     const id = window.setInterval(() => {
