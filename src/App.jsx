@@ -352,6 +352,7 @@ function App() {
   const [loginVisible, setLoginVisible] = useState(false)
   const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [loginSubmitting, setLoginSubmitting] = useState(false)
   const [formNama, setFormNama] = useState('')
   const [formEmail, setFormEmail] = useState('')
   const [formTelepon, setFormTelepon] = useState('')
@@ -650,6 +651,7 @@ function App() {
 
   const handleLoginSubmit = async (event) => {
     event.preventDefault()
+    if (loginSubmitting) return
 
     const email = String(loginIdentifier).trim()
     const password = String(loginPassword)
@@ -664,6 +666,8 @@ function App() {
     const apiBaseUrl = defaultApiBaseUrl
 
     try {
+      setLoginSubmitting(true)
+      setLoginError('')
       const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -713,6 +717,8 @@ function App() {
       return
     } catch (err) {
       setLoginError('Terjadi kesalahan. Pastikan backend aktif di ' + apiBaseUrl)
+    } finally {
+      setLoginSubmitting(false)
     }
   }
 
@@ -935,9 +941,17 @@ function App() {
 
                 <button
                   type="submit"
-                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c0392b] to-[#f1c40f] px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#111111] transition hover:brightness-110"
+                  disabled={loginSubmitting}
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c0392b] to-[#f1c40f] px-5 py-3.5 text-sm font-bold uppercase tracking-[1px] text-[#111111] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Masuk
+                  {loginSubmitting ? (
+                    <>
+                      <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+                      Memproses...
+                    </>
+                  ) : (
+                    'Masuk'
+                  )}
                 </button>
 
                 <div className="text-center text-xs text-white/60">
