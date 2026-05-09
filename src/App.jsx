@@ -668,11 +668,50 @@ function App() {
     try {
       setLoginSubmitting(true)
       setLoginError('')
-      const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+      const warmup = async () => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+        try {
+          await fetch(`${apiBaseUrl}/health`, { method: 'GET', cache: 'no-store', signal: controller.signal })
+        } catch {
+          // ignore
+        } finally {
+          clearTimeout(timeoutId)
+        }
+      }
+
+      const postLogin = async () => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 12000)
+        try {
+          return await fetch(`${apiBaseUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+            signal: controller.signal,
+          })
+        } finally {
+          clearTimeout(timeoutId)
+        }
+      }
+
+      await warmup()
+
+      let response = null
+      let lastErr = null
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          response = await postLogin()
+          break
+        } catch (e) {
+          lastErr = e
+          if (attempt < 2) await sleep(800 * Math.pow(2, attempt))
+        }
+      }
+      if (!response) {
+        throw lastErr || new Error('Gagal menghubungi backend')
+      }
 
       const raw = await response.text()
       let data = null
@@ -716,7 +755,13 @@ function App() {
       
       return
     } catch (err) {
-      setLoginError('Terjadi kesalahan. Pastikan backend aktif di ' + apiBaseUrl)
+      const msg = typeof err?.message === 'string' ? err.message : ''
+      setLoginError(
+        'Terjadi kesalahan. Pastikan backend aktif di ' +
+          apiBaseUrl +
+          (msg ? ' (' + msg + ')' : '') +
+          '. Jika ini serverless, tunggu 5-15 detik lalu coba lagi.'
+      )
     } finally {
       setLoginSubmitting(false)
     }
